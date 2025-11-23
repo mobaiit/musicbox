@@ -503,7 +503,62 @@
       gap: 6px;
     }
 
-    #audioEl { width: 100%; }
+    /* 隐藏原生 audio 控件，只用来播放声音 */
+    #audioEl {
+      display: none;
+    }
+
+    /* ▶ 自定义玻璃风进度条 */
+    .progress-container {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-bar {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top,
+                  rgba(12, 20, 50, 0.95),
+                  rgba(4, 8, 20, 0.95));
+      border: 1px solid rgba(174, 207, 255, 0.35);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      transform: scaleX(0);
+      background: linear-gradient(120deg,
+                  rgba(253, 203, 110, 0.95),
+                  rgba(116, 185, 255, 0.95));
+      box-shadow:
+        0 0 12px rgba(253, 203, 110, 0.8),
+        0 0 22px rgba(116, 185, 255, 0.75);
+    }
+
+    .progress-glow {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+                  rgba(255, 255, 255, 0.25),
+                  transparent 55%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .time-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: rgba(190, 205, 245, 0.9);
+      font-variant-numeric: tabular-nums;
+    }
 
     .player-buttons {
       display: flex;
@@ -564,7 +619,7 @@
       border-radius: 12px;
       border: 1px solid rgba(174, 207, 255, 0.18);
       padding: 6px 8px;
-      max-height: 110px;
+      max-height: 100px;   /* 略微缩小播放列表高度 */
       overflow-y: auto;
       flex: 0 0 auto;
     }
@@ -641,10 +696,10 @@
       flex: 1;
       background: rgba(7, 11, 28, 0.9);
       border-radius: 14px;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border: 1px solid rgba(174, 207, 255, 0.18);
       overflow-y: auto;
-      max-height: 100px;
+      max-height: 72px;     /* 歌词显示区域缩小，整体高度更矮 */
       scrollbar-width: thin;
       scrollbar-color: rgba(116, 185, 255, 0.7) transparent;
       font-size: 12px;
@@ -660,7 +715,7 @@
     .lyrics-placeholder {
       color: rgba(160, 177, 225, 0.9);
       text-align: center;
-      padding: 14px 6px;
+      padding: 10px 6px;
       white-space: pre-line;
     }
 
@@ -808,7 +863,21 @@
           </div>
 
           <div class="player-controls">
-            <audio id="audioEl" controls preload="none"></audio>
+            <!-- 隐藏的原生 audio，只负责播放 -->
+            <audio id="audioEl" preload="none"></audio>
+
+            <!-- 自定义进度条 -->
+            <div class="progress-container">
+              <div id="musicProgressBar" class="progress-bar">
+                <div id="musicProgressFill" class="progress-fill"></div>
+                <div class="progress-glow"></div>
+              </div>
+              <div class="time-labels">
+                <span id="currentTimeLabel">00:00</span>
+                <span id="durationLabel">00:00</span>
+              </div>
+            </div>
+
             <div class="player-buttons">
               <div class="left-buttons">
                 <button id="toggleLyricsBtn" type="button" class="link-btn">
@@ -1088,6 +1157,14 @@
     const playlistListEl = document.getElementById("playlistList");
     const shortcutsHintEl = document.getElementById("shortcutsHint");
 
+    // 自定义进度条元素
+    const progressBarEl = document.getElementById("musicProgressBar");
+    const progressFillEl = document.getElementById("musicProgressFill");
+    const currentTimeLabelEl = document.getElementById("currentTimeLabel");
+    const durationLabelEl = document.getElementById("durationLabel");
+    if (currentTimeLabelEl) currentTimeLabelEl.textContent = "00:00";
+    if (durationLabelEl) durationLabelEl.textContent = "00:00";
+
     // 播放模式：顺序 / 列表循环 / 单曲循环
     const PLAY_MODE_SEQUENCE = "sequence";
     const PLAY_MODE_LOOP_ALL = "loop_all";
@@ -1295,6 +1372,51 @@
       }
       draw();
     }
+
+    // ------------------------ 自定义进度条逻辑 ------------------------
+
+    function formatTime(sec) {
+      if (!isFinite(sec) || sec < 0) return "00:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      const mm = m < 10 ? "0" + m : String(m);
+      const ss = s < 10 ? "0" + s : String(s);
+      return mm + ":" + ss;
+    }
+
+    function updateProgressBar() {
+      if (!progressBarEl || !progressFillEl || !currentTimeLabelEl || !durationLabelEl) return;
+
+      if (!isFinite(audioEl.duration) || audioEl.duration <= 0) {
+        progressFillEl.style.transform = "scaleX(0)";
+        currentTimeLabelEl.textContent = "00:00";
+        durationLabelEl.textContent = "00:00";
+        return;
+      }
+
+      const ratio = audioEl.currentTime / audioEl.duration;
+      const clamped = Math.min(Math.max(ratio, 0), 1);
+      progressFillEl.style.transform = "scaleX(" + clamped + ")";
+      currentTimeLabelEl.textContent = formatTime(audioEl.currentTime);
+      durationLabelEl.textContent = formatTime(audioEl.duration);
+    }
+
+    audioEl.addEventListener("timeupdate", updateProgressBar);
+    audioEl.addEventListener("loadedmetadata", updateProgressBar);
+
+    if (progressBarEl) {
+      progressBarEl.addEventListener("click", (e) => {
+        if (!isFinite(audioEl.duration) || audioEl.duration <= 0) return;
+        const rect = progressBarEl.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const ratio = x / rect.width;
+        const clamped = Math.min(Math.max(ratio, 0), 1);
+        audioEl.currentTime = clamped * audioEl.duration;
+        updateProgressBar();
+      });
+    }
+
+    // ------------------------ 其他 UI 逻辑 ------------------------
 
     function setStatus(text, kind) {
       globalStatusText.textContent = text;
@@ -1936,9 +2058,11 @@
       if (dotEl) dotEl.className = "source-dot " + dotClass;
       songSourceTag.style.display = "inline-flex";
 
+      // 重置歌词与进度条显示
       lrcEntries = [];
       currentLyricIndex = -1;
       if (lyricsLinkWrap) lyricsLinkWrap.innerHTML = "";
+      updateProgressBar();
     }
 
     async function loadLyricsForData(data) {
@@ -2030,6 +2154,7 @@
       if (lyricsLinkWrap) lyricsLinkWrap.innerHTML = "";
     }
 
+    // 原有 timeupdate：歌词同步（与进度条的 timeupdate 共存）
     audioEl.addEventListener("timeupdate", () => {
       if (!lrcEntries.length) return;
       const currentTime = audioEl.currentTime;
