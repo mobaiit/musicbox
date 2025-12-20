@@ -53,7 +53,7 @@
         #02030a;
     }
 
-    /* 主容器：四周留白，玻璃面板略小一点，露出粒子 */
+    /* 主容器：四周留白 */
     .app {
       position: relative;
       z-index: 1;
@@ -73,18 +73,11 @@
         0 0 40px rgba(0,0,0,0.9),
         0 0 120px rgba(136,196,255,0.35);
     }
-
     @media (max-width: 1280px) {
-      .app {
-        margin: 32px 40px;
-        height: calc(100vh - 70px);
-      }
+      .app { margin: 32px 40px; height: calc(100vh - 70px); }
     }
     @media (max-width: 900px) {
-      .app {
-        margin: 16px;
-        height: calc(100vh - 32px);
-      }
+      .app { margin: 16px; height: calc(100vh - 32px); }
     }
 
     .ripple-target,
@@ -139,7 +132,7 @@
     }
     @keyframes pika-float {
       0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
+      50%     { transform: translateY(-5px); }
     }
 
     .title-text h1 {
@@ -206,11 +199,10 @@
       font-size: 15px;
     }
 
-    /* 布局：左右略宽，中间略窄一点 */
+    /* 布局修正：左右也参与分配宽度，不再挤出空白 */
     .layout {
       flex: 1;
       display: grid;
-      /* 左中右都用 fr，让搜索 + 播放列表在大屏上自动变宽 */
       grid-template-columns:
         minmax(260px, 0.6fr)
         minmax(360px, 2.0fr)
@@ -231,7 +223,6 @@
       backdrop-filter: blur(18px);
       box-shadow: 0 14px 34px rgba(0,0,0,0.85);
       z-index: 0;
-      overflow: hidden;
     }
     .panel::before {
       content: "";
@@ -332,7 +323,6 @@
       min-height: 0;
     }
 
-    /* 胶囊搜索条 */
     .search-row {
       display: flex;
       align-items: center;
@@ -485,7 +475,7 @@
       font-size: 9px;
     }
 
-    /* 中间播放器（整体略小） */
+    /* 中间播放器 */
     .player-panel {
       background:
         radial-gradient(circle at 50% -40%, rgba(255,218,120,0.20), transparent 60%),
@@ -615,10 +605,7 @@
       gap:6px;
       font-size:11px;
     }
-    .player-btn-row {
-      display:flex;
-      gap:5px;
-    }
+    .player-btn-row { display:flex; gap:5px; }
     .status-pill {
       padding:2px 8px;
       border-radius:999px;
@@ -699,7 +686,7 @@
       accent-color:var(--accent);
     }
 
-    /* 歌词：略小一点，最大宽度缩小，周围留更多空间 */
+    /* 歌词区域 */
     .lyrics-container {
       flex: 1;
       min-height: 0;
@@ -738,7 +725,6 @@
       animation: lyricsGlow 16s linear infinite;
     }
     @keyframes lyricsGlow { to { transform:rotate(360deg);} }
-
     .lyrics-container::after {
       top:-40%;
       left:-20%;
@@ -769,7 +755,6 @@
         rgba(186,132,255,0.40)
       );
     }
-
     .lyrics-inner {
       position:relative;
       z-index:1;
@@ -815,7 +800,7 @@
       letter-spacing:0.03em;
     }
 
-    /* 右侧播放列表 */
+    /* 右侧播放列表面板 */
     .playlist-panel {
       background:
         radial-gradient(circle at 100% -40%, rgba(120,195,255,0.22), transparent 60%),
@@ -847,13 +832,16 @@
       box-shadow:0 0 8px rgba(104,174,255,0.7);
     }
 
+    /* 让 playlist-main 内部滚动，顶部条 sticky 不再消失 */
     .playlist-main {
       flex:1;
+      min-height:0;
       display:flex;
       flex-direction:column;
-      min-height:0;
       position:relative;
       z-index:1;
+      overflow-y:auto;
+      padding-right:4px;
     }
 
     .playlist-bar {
@@ -865,6 +853,13 @@
       gap:6px;
       flex-shrink:0;
       padding-bottom:4px;
+      margin-bottom:4px;
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:
+        linear-gradient(180deg, rgba(7,10,30,0.98), rgba(7,10,30,0.85));
+      border-bottom:1px solid rgba(255,255,255,0.08);
     }
     .playlist-info {
       flex:1;
@@ -918,11 +913,7 @@
     }
 
     .playlist-list {
-      flex:1;
-      min-height:0;
-      overflow-y:auto;
-      padding-right:4px;
-      margin-top:4px;
+      flex:0 0 auto;
       position:relative;
       z-index:1;
     }
@@ -1052,33 +1043,33 @@
       }
     }
 
-    /* 自定义滚动条 */
+    /* 滚动条 */
     .search-results-mini::-webkit-scrollbar,
-    .playlist-list::-webkit-scrollbar,
+    .playlist-main::-webkit-scrollbar,
     .lyrics-container::-webkit-scrollbar {
       width:6px;
     }
     .search-results-mini::-webkit-scrollbar-track,
-    .playlist-list::-webkit-scrollbar-track,
+    .playlist-main::-webkit-scrollbar-track,
     .lyrics-container::-webkit-scrollbar-track {
       background:rgba(4,6,22,0.65);
       border-radius:999px;
     }
     .search-results-mini::-webkit-scrollbar-thumb,
-    .playlist-list::-webkit-scrollbar-thumb,
+    .playlist-main::-webkit-scrollbar-thumb,
     .lyrics-container::-webkit-scrollbar-thumb {
       border-radius:999px;
       background:linear-gradient(180deg, rgba(122,182,255,0.9), rgba(255,196,120,0.9));
       box-shadow:0 0 8px rgba(130,190,255,0.9);
     }
     .search-results-mini,
-    .playlist-list,
+    .playlist-main,
     .lyrics-container {
       scrollbar-width:thin;
       scrollbar-color:rgba(130,190,255,0.9) rgba(4,6,22,0.65);
     }
 
-    /* 弹窗（歌单 & 快捷键） */
+    /* 弹窗 */
     .modal-backdrop {
       position:fixed;
       inset:0;
@@ -1158,7 +1149,7 @@
       margin-top:4px;
     }
 
-    /* 快捷键说明小卡片 */
+    /* 快捷键说明 */
     .shortcut-grid {
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1175,15 +1166,8 @@
       flex-direction:column;
       gap:3px;
     }
-    .shortcut-label {
-      font-size:11px;
-      color:var(--text-sub);
-    }
-    .shortcut-key {
-      display:flex;
-      flex-wrap:wrap;
-      gap:3px;
-    }
+    .shortcut-label { font-size:11px; color:var(--text-sub); }
+    .shortcut-key { display:flex; flex-wrap:wrap; gap:3px; }
     .shortcut-key kbd {
       padding:2px 6px;
       border-radius:6px;
@@ -1237,7 +1221,7 @@
         </div>
         <div class="title-text">
           <h1 data-i18n="appTitle">皮卡丘的音乐站</h1>
-          <p data-i18n="authorLabel">作者：Zhenchao Jin</p>
+          <p data-i18n="authorLabel">作者：Zhenchao Jin + GPT 5.1</p>
         </div>
       </div>
       <div class="header-controls">
@@ -1308,7 +1292,7 @@
           </div>
 
           <div class="search-stats">
-            <span id="search-status" data-i18n="searchStatusIdle">尚未搜索，试试输入“起风了”？</span>
+            <span id="search-status" data-i18n="searchStatusIdle">尚未搜索，试试输入“林俊杰”？</span>
             <span id="search-count">0</span>
           </div>
 
@@ -1316,7 +1300,7 @@
         </div>
       </section>
 
-      <!-- 中：播放器 + 歌词 -->
+      <!-- 中：播放器 -->
       <section class="panel player-panel ripple-target">
         <div class="panel-header">
           <div class="panel-title">
@@ -1507,7 +1491,7 @@
     const translations = {
       zh: {
         appTitle:"皮卡丘的音乐站",
-        authorLabel:"作者：Zhenchao Jin",
+        authorLabel:"作者：Zhenchao Jin + GPT 5.1",
         shortcutHint:"快捷键：Space 播放/暂停 · ←/→ 跳转 · ↑/↓ 音量 · N/P 切歌 · F 收藏 · L 切换歌词效果",
         shortcutPanelTitle:"快捷键说明",
         shortcutPanelDesc:"使用键盘可以更加方便地控制皮卡丘的音乐站：",
@@ -1520,14 +1504,13 @@
         shortcutMute:"静音 / 取消静音",
         shortcutFocusSearch:"聚焦搜索框",
         shortcutCloseModal:"提示：按 Esc 可以关闭弹窗。",
-
         searchTitle:"歌曲搜索",
         searchSubtitle:"支持咪咕 / 网易云 / QQ / 酷我",
         searchButton:"搜索",
         perSourceCount:"每个源加载",
         perSourceCountTail:"首结果",
         loadMore:"加载更多",
-        searchStatusIdle:"尚未搜索，试试输入“起风了”？",
+        searchStatusIdle:"尚未搜索，试试输入“林俊杰”？",
         searchStatusSearching:"正在搜索中…",
         searchStatusDone:"搜索完成。",
         searchStatusNoSource:"请至少选择一个音乐源。",
@@ -1576,7 +1559,7 @@
       },
       en: {
         appTitle:"Pikachu Music Station",
-        authorLabel:"Author: Zhenchao Jin",
+        authorLabel:"Author: Zhenchao Jin + GPT 5.1",
         shortcutHint:"Shortcuts: Space Play/Pause · ←/→ Seek · ↑/↓ Volume · N/P Track · F Fav · L Lyrics FX",
         shortcutPanelTitle:"Keyboard Shortcuts",
         shortcutPanelDesc:"Control Pikachu Music Station more easily with your keyboard:",
@@ -1589,14 +1572,13 @@
         shortcutMute:"Mute / unmute",
         shortcutFocusSearch:"Focus on search box",
         shortcutCloseModal:"Tip: press Esc to close dialogs.",
-
-        searchTitle:"Song Search",
+        searchTitle:"Search",
         searchSubtitle:"Supports Migu / Netease / QQ / Kuwo",
         searchButton:"Search",
         perSourceCount:"Per source",
         perSourceCountTail:"results",
         loadMore:"Load more",
-        searchStatusIdle:"No search yet. Try typing \"Qifeng Le\"?",
+        searchStatusIdle:"No search yet. Try typing \"JJ Lin\"?",
         searchStatusSearching:"Searching…",
         searchStatusDone:"Search completed.",
         searchStatusNoSource:"Please select at least one music source.",
@@ -1668,7 +1650,7 @@
     };
 
     const dom = {};
-    let audioLevel = 0; // 用于粒子呼吸效果
+    let audioLevel = 0;
 
     function $(id){return document.getElementById(id);}
     function t(k){const lang=state.language;return (translations[lang]&&translations[lang][k])||translations.zh[k]||k;}
@@ -2432,6 +2414,7 @@
       dom.lyricsInner=$('lyrics-inner');
       dom.lyricsContainer=document.querySelector('.lyrics-container');
 
+      dom.playlistMain=document.querySelector('.playlist-main');
       dom.playlistList=$('playlist-list');
       dom.playlistInfo=$('playlist-info');
       dom.playlistSelectRow=$('playlist-select-row');
@@ -2498,11 +2481,12 @@
         }
       });
 
-      dom.playlistList.addEventListener('scroll',()=>{
+      // 现在监听 playlist-main 的滚动，实现“滚动到底加载更多”
+      dom.playlistMain.addEventListener('scroll',()=>{
         const activeTab=document.querySelector('.playlist-tab.active')?.dataset.tab||'results';
         if(activeTab!=='results')return;
         if(!canAutoLoadMore())return;
-        if(dom.playlistList.scrollTop + dom.playlistList.clientHeight >= dom.playlistList.scrollHeight-10){
+        if(dom.playlistMain.scrollTop + dom.playlistMain.clientHeight >= dom.playlistMain.scrollHeight-10){
           requestMoreResults();
         }
       });
@@ -2527,7 +2511,6 @@
           const w=dom.progressWrapper.clientWidth;
           dom.progressHandle.style.left=(w*r)+'px';
         }
-        // 用当前时间模拟节奏，让粒子有“跟着音乐”的感觉
         const intensity = Math.abs(Math.sin(cur * 2.3));
         audioLevel = 0.3 + 0.7 * intensity * (dom.audio.volume || 1);
         updateLyricsHighlight(cur);
