@@ -895,7 +895,7 @@
             <div class="song-info">
                 <div class="full-title">播放列表</div>
             </div>
-            <button id="clearPlaylistBtn" class="close-btn">🗑</button>
+            <div style="width:40px;"></div>
         </div>
         <div class="playlist-controls">
             <button id="playlistModeBtn" class="playlist-mode-btn">🔁</button>
@@ -1067,12 +1067,27 @@
             else if(tab==='favorites')list=state.favorites;
             else if(tab==='playlists'){
                 if(state.history.length){
-                    wrap.innerHTML=`<div style="padding:10px 0;color:var(--text-sub);font-size:14px;">播放历史</div>`;
+                    const headerDiv=document.createElement('div');
+                    headerDiv.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 0;';
+                    headerDiv.innerHTML='<span style="color:var(--text-sub);font-size:14px;">播放历史</span><button id="clearHistoryBtn" style="padding:4px 8px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.1);color:var(--text-sub);font-size:12px;cursor:pointer;">清空历史</button>';
+                    wrap.appendChild(headerDiv);
                     state.history.slice(0,20).forEach((tr,idx)=>{
                         const row=document.createElement('div');row.className='track';const srcTag=tr.source==='migu'?'咪咕':tr.source==='netease'?'网易云':tr.source==='qq'?'QQ':'酷我';
                         row.innerHTML=`<div class="index">${idx+1}</div><img class="cover" src="${tr.cover||''}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="cover-placeholder" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,rgba(255,205,50,.15),rgba(255,183,77,.15));display:none;margin-right:12px;flex-shrink:0;text-align:center;line-height:48px;color:var(--accent);font-size:22px;box-shadow:0 2px 6px rgba(255,205,50,.2);">🎵</div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist"><span class="source-tag source-${tr.source}">${srcTag}</span>${tr.singer||''}</div></div><button class="playbtn">▶</button>`;
                         row.querySelector('.playbtn').onclick=async(e)=>{window.event=e;await playTrack(tr);};row.onclick=()=>row.querySelector('.playbtn').click();wrap.appendChild(row);
                     });
+                    // 添加清空历史按钮事件
+                    const clearBtn=document.getElementById('clearHistoryBtn');
+                    if(clearBtn){
+                        clearBtn.onclick=()=>{
+                            if(confirm('确定要清空所有播放历史吗？')){
+                                state.history=[];
+                                saveData();
+                                renderList();
+                                toast('播放历史已清空');
+                            }
+                        };
+                    }
                 }
                 if(state.searchHistory.length){
                     const histDiv=document.createElement('div');histDiv.style.cssText='padding:20px 0 10px;color:var(--text-sub);font-size:14px;';histDiv.textContent='搜索历史';wrap.appendChild(histDiv);
@@ -1342,7 +1357,6 @@
             $('playlistOpacitySlider').addEventListener('input',()=>{const opacity=parseFloat($('playlistOpacitySlider').value);$('playlistView').style.background=`rgba(26,26,46,${opacity})`;});
             dom.fullListBtn.addEventListener('click',()=>{renderPlaylist();$('playlistView').style.display='flex';$('fullPlayerOpacitySlider').parentElement.style.display='none';});
             $('playlistBackBtn').addEventListener('click',()=>{$('playlistView').style.display='none';$('fullPlayerOpacitySlider').parentElement.style.display='flex';});
-            $('clearPlaylistBtn').addEventListener('click',()=>{state.history=[];saveData();renderPlaylist();toast('播放历史已清空');});
             $('playlistModeBtn').addEventListener('click',()=>{
                 if(state.mode==='list')state.mode='loop';
                 else if(state.mode==='loop')state.mode='single';
