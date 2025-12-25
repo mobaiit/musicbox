@@ -274,6 +274,12 @@
             .inline-lyrics div {
                 transition: all .35s cubic-bezier(.4,0,.2,1);
                 margin: 8px 0;
+                cursor:pointer;
+                padding:4px 8px;
+                border-radius:8px;
+            }
+            .inline-lyrics div:hover {
+                background:rgba(255,255,255,.05);
             }
             .inline-lyrics .active {
                 color: var(--accent);
@@ -572,12 +578,19 @@
         .lyrics-scroll-full div{
             transition:all .35s cubic-bezier(.4,0,.2,1);
             margin:8px 0;
+            cursor:pointer;
+            padding:4px 8px;
+            border-radius:8px;
+        }
+        .lyrics-scroll-full div:hover{
+            background:rgba(255,255,255,.05);
         }
         .lyrics-scroll-full .active{
             color:var(--accent);
-            font-size:18px;
+            font-size:22px;
             font-weight:700;
             text-shadow:0 0 15px rgba(255,205,50,.55);
+            transform:scale(1.02);
         }
         .lyrics-scroll-full.alt-style{
             background:linear-gradient(135deg,rgba(255,205,50,.1),rgba(255,105,180,.1));
@@ -1150,19 +1163,42 @@
         function updateUI(){const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';const artistText=tr?tr.singer:'点击选择音乐';const qualityText=tr?state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准':'';const qualityClass=tr?`quality-${state.quality}`:'';$('artist').innerHTML=tr?`${artistText} <span class="quality-tag ${qualityClass}">${qualityText}</span>`:artistText;if($('fullTitle'))$('fullTitle').textContent=tr?tr.title:'--';if($('fullArtist'))$('fullArtist').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';if($('fullTitlePC'))$('fullTitlePC').textContent=tr?tr.title:'--';if($('fullArtistPC'))$('fullArtistPC').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';const cover=tr&&tr.cover?tr.cover:'';$('cover').src=cover;$('cover').style.display=tr&&tr.cover?'block':'none';if($('fullCover'))$('fullCover').src=cover||'';$('playPauseBtn').textContent=state.playing?'⏸':'▶';if($('fullPlayBtn'))$('fullPlayBtn').textContent=state.playing?'⏸':'▶';if($('lyricsPlayBtn'))$('lyricsPlayBtn').textContent=state.playing?'⏸':'▶';const isFav=tr&&state.favorites.find(f=>f.uid===tr.uid);if($('fullFavBtn'))$('fullFavBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';$('favBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.history];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});document.querySelectorAll('.playbtn').forEach(btn=>{const trackRow=btn.closest('.track');if(trackRow){const isCurrentTrack=state.current&&trackRow.querySelector('.title').textContent===state.current.title;btn.textContent=isCurrentTrack&&state.playing?'⏸':'▶';}});$('player').classList.toggle('show',!!tr);}
         function renderLyrics(){
             const wrap=$('lyricsScroll');
-            wrap.innerHTML='';
+            const inlineEl=$('inlineLyrics');
+            if(!wrap)return;
             if(!state.lyrics.length){
-                wrap.innerHTML='<div style="margin-top:30px;color:var(--text-sub)">暂无歌词</div>';
+                wrap.innerHTML='<div style="text-align:center;color:var(--text-sub);margin-top:100px;">暂无歌词</div>';
+                if(inlineEl)inlineEl.innerHTML='<div style="text-align:center;color:var(--text-sub);">暂无歌词</div>';
                 return;
             }
-            state.lyrics.forEach((l,i)=>{
-                const div=document.createElement('div');
-                div.textContent=l.text;
-                div.dataset.idx=i;
-                div.dataset.time=l.time;
-                wrap.appendChild(div);
+            
+            // 渲染歌词行，添加点击跳转功能
+            const html=state.lyrics.map((l,i)=>`<div data-time="${l.time}" data-index="${i}" style="cursor:pointer;">${l.text}</div>`).join('');
+            wrap.innerHTML=html;
+            if(inlineEl)inlineEl.innerHTML=html;
+            
+            // 添加点击跳转事件
+            wrap.querySelectorAll('div[data-time]').forEach(div => {
+                div.addEventListener('click', () => {
+                    const time = parseFloat(div.dataset.time);
+                    if (dom.audio && isFinite(time)) {
+                        dom.audio.currentTime = time;
+                        toast('已跳转到指定位置');
+                    }
+                });
             });
-            state.lyricIndex=-1;
+            
+            if(inlineEl) {
+                inlineEl.querySelectorAll('div[data-time]').forEach(div => {
+                    div.addEventListener('click', () => {
+                        const time = parseFloat(div.dataset.time);
+                        if (dom.audio && isFinite(time)) {
+                            dom.audio.currentTime = time;
+                            toast('已跳转到指定位置');
+                        }
+                    });
+                });
+            }
+            
             $('lyricsTitle').textContent=state.current?state.current.title:'--';
             $('lyricsArtist').textContent=state.current?state.current.singer:'--';
         }
@@ -1209,29 +1245,29 @@
         // 专业级歌词滚动控制
         let lyricsScrollAnimation = null;
         let inlineScrollAnimation = null;
-        
+
         function smoothScrollTo(container, targetTop, duration = 600) {
             const startTop = container.scrollTop;
             const distance = targetTop - startTop;
             const startTime = performance.now();
-            
+
             // 专业级缓动函数 - 更自然的动画曲线
             function easeOutQuart(t) {
                 return 1 - Math.pow(1 - t, 4);
             }
-            
+
             function animate(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const easedProgress = easeOutQuart(progress);
-                
+
                 container.scrollTop = startTop + distance * easedProgress;
-                
+
                 if (progress < 1) {
                     return requestAnimationFrame(animate);
                 }
             }
-            
+
             return requestAnimationFrame(animate);
         }
 
@@ -1243,13 +1279,13 @@
             });
             if(idx<0||idx===state.lyricIndex)return;
             state.lyricIndex=idx;
-            
+
             // 取消之前的滚动动画
             if(lyricsScrollAnimation) {
                 cancelAnimationFrame(lyricsScrollAnimation);
                 lyricsScrollAnimation = null;
             }
-            
+
             document.querySelectorAll('#lyricsScroll div').forEach((el,i)=>{
                 el.classList.toggle('active',i===idx);
                 // 专业级透明度渐变
@@ -1262,7 +1298,7 @@
                 else opacity = 0.15;
                 el.style.opacity = opacity;
             });
-            
+
             // 专业级滚动动画
             const active=$('lyricsScroll').querySelector('.active');
             if(active){
@@ -1271,11 +1307,11 @@
                 const activeTop = active.offsetTop;
                 const activeHeight = active.clientHeight;
                 const targetScrollTop = activeTop - (containerHeight / 2) + (activeHeight / 2);
-                
+
                 // 智能滚动距离判断
                 const scrollDistance = Math.abs(targetScrollTop - container.scrollTop);
                 const duration = Math.min(800, Math.max(400, scrollDistance * 1.2));
-                
+
                 lyricsScrollAnimation = smoothScrollTo(container, targetScrollTop, duration);
             }
 
@@ -1311,13 +1347,13 @@
                 return time>=l.time&&(next?time<next.time:true);
             });
             if(idx<0)return;
-            
+
             // 取消之前的滚动动画
             if(inlineScrollAnimation) {
                 cancelAnimationFrame(inlineScrollAnimation);
                 inlineScrollAnimation = null;
             }
-            
+
             document.querySelectorAll('#inlineLyrics div').forEach((el,i)=>{
                 el.classList.toggle('active',i===idx);
                 // 专业级透明度渐变
@@ -1330,7 +1366,7 @@
                 else opacity = 0.15;
                 el.style.opacity = opacity;
             });
-            
+
             // 专业级滚动动画
             const active=$('inlineLyrics').querySelector('.active');
             if(active){
@@ -1340,11 +1376,11 @@
                     const activeTop = active.offsetTop - container.offsetTop;
                     const activeHeight = active.clientHeight;
                     const targetScrollTop = Math.max(0, activeTop - (containerHeight / 2) + (activeHeight / 2));
-                    
+
                     // 智能滚动距离判断
                     const scrollDistance = Math.abs(targetScrollTop - container.scrollTop);
                     const duration = Math.min(800, Math.max(400, scrollDistance * 1.2));
-                    
+
                     inlineScrollAnimation = smoothScrollTo(container, targetScrollTop, duration);
                 }
             }
@@ -1536,9 +1572,33 @@
             });
             $('volumeBackBtn').addEventListener('click',()=>{$('volumePanel').style.display='none';});
             document.querySelectorAll('.volume-preset').forEach(btn=>btn.addEventListener('click',()=>{const vol=parseFloat(btn.dataset.volume);dom.audio.volume=vol;state.volume=vol;saveData();}));
-            $('jumpPrev').onclick=()=>{if(state.lyricIndex>0){dom.audio.currentTime=state.lyrics[state.lyricIndex-1].time+.1;}};
-            $('jumpNext').onclick=()=>{if(state.lyricIndex<state.lyrics.length-1){dom.audio.currentTime=state.lyrics[state.lyricIndex+1].time+.1;}};
-            $('lyricsStyleBtn').onclick=()=>{state.lyricsAlt=!state.lyricsAlt;$('lyricsScroll').classList.toggle('alt-style',state.lyricsAlt);toast('歌词样式已切换');};
+            // 歌词跳转按钮
+            $('jumpPrev').addEventListener('click',()=>{
+                if(state.lyricIndex>0){
+                    const time=state.lyrics[state.lyricIndex-1].time;
+                    dom.audio.currentTime=time;
+                    toast('跳转到上一句');
+                }
+            });
+            $('jumpNext').addEventListener('click',()=>{
+                if(state.lyricIndex<state.lyrics.length-1){
+                    const time=state.lyrics[state.lyricIndex+1].time;
+                    dom.audio.currentTime=time;
+                    toast('跳转到下一句');
+                }
+            });
+            
+            // 歌词样式切换
+            $('lyricsStyleBtn').addEventListener('click', () => {
+                const lyricsContainer = $('lyricsScroll');
+                if (lyricsContainer.classList.contains('alt-style')) {
+                    lyricsContainer.classList.remove('alt-style');
+                    toast('切换到默认样式');
+                } else {
+                    lyricsContainer.classList.add('alt-style');
+                    toast('切换到炫彩样式');
+                }
+            });
 
             // 进度条拖动功能（鼠标和触摸）
             let progressDragging = false;
