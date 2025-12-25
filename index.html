@@ -52,6 +52,7 @@
         .sourcebar .sources{display:flex;gap:8px;}
         .sourcebar label{display:flex;align-items:center;gap:4px;}
         .sourcebar input{margin:0;width:12px;height:12px;accent-color:var(--accent);}
+        .sourcebar .limit-wrapper{display:flex;align-items:center;gap:6px;}
         .sourcebar .quality-wrapper{display:flex;align-items:center;gap:6px;}
         .sourcebar select{background:#000;color:var(--text-main);border:1px solid var(--border);border-radius:8px;padding:3px 6px;font-size:11px;outline:none;}
         .sourcebar select option[value="standard"]{color:#4caf50;}
@@ -742,6 +743,16 @@
             <label><input type="checkbox" data-src="qq">QQ</label>
             <label><input type="checkbox" data-src="kuwo">酷我</label>
         </div>
+        <div class="limit-wrapper">
+            <span>数量:</span>
+            <select id="limitSelect">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
         <div class="quality-wrapper">
             <span>音质:</span>
             <select id="qualitySelect">
@@ -957,8 +968,8 @@
         };
 
         // 本地存储
-        function saveData(){localStorage.setItem('musicbox',JSON.stringify({favorites:state.favorites,history:state.history,searchHistory:state.searchHistory,enabledSources:state.enabledSources,mode:state.mode,volume:state.volume,quality:state.quality}));}
-        function loadData(){try{const d=JSON.parse(localStorage.getItem('musicbox')||'{}');Object.assign(state,d);if(!state.history)state.history=[];if(!state.searchHistory)state.searchHistory=[];if(!state.quality)state.quality='high';}catch(e){}}
+        function saveData(){localStorage.setItem('musicbox',JSON.stringify({favorites:state.favorites,history:state.history,searchHistory:state.searchHistory,enabledSources:state.enabledSources,mode:state.mode,volume:state.volume,quality:state.quality,perLimit:state.perLimit}));}
+        function loadData(){try{const d=JSON.parse(localStorage.getItem('musicbox')||'{}');Object.assign(state,d);if(!state.history)state.history=[];if(!state.searchHistory)state.searchHistory=[];if(!state.quality)state.quality='high';if(!state.perLimit)state.perLimit=20;}catch(e){}}
         const dom={};
         function $(id){return document.getElementById(id);}
         function toast(msg){
@@ -1329,6 +1340,7 @@
             $('disclaimerClose').addEventListener('click',()=>{$('disclaimerModal').style.display='none';});
             $('disclaimerModal').addEventListener('click',e=>{if(e.target===$('disclaimerModal'))$('disclaimerModal').style.display='none';});
             document.querySelectorAll('.sourcebar input').forEach(cb=>cb.addEventListener('change',()=>{state.enabledSources[cb.dataset.src]=cb.checked;saveData();}));
+            $('limitSelect').addEventListener('change',()=>{state.perLimit=parseInt($('limitSelect').value);saveData();toast(`结果数量已设置为${state.perLimit}条`);if(state.keyword){searchAll(true);}else{loadDefault();}});
             $('qualitySelect').addEventListener('change',()=>{state.quality=$('qualitySelect').value;saveData();toast(`音质已切换至${state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准'}`);if(state.keyword){searchAll(true);}else{loadDefault();}});
             document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===tab));renderList();}));
 
@@ -1435,7 +1447,7 @@
                 lyricsIsDragging = false;
             });
             $('volumeBackBtn').addEventListener('click',()=>{$('volumePanel').style.display='none';});
-            $('volumeSlider').addEventListener('input',()=>{dom.audio.volume=parseFloat($('volumeSlider').value);state.volume=dom.audio.volume;saveData();updateVolumeDisplay();});
+            $('volumeSlider').addEventListener('input',()=>{const vol=parseFloat($('volumeSlider').value);dom.audio.volume=vol;state.volume=vol;saveData();updateVolumeDisplay();});
             $('muteBtn').addEventListener('click',()=>{state.muted=!state.muted;dom.audio.muted=state.muted;$('muteBtn').textContent=state.muted?'🔇':'🔊';});
             document.querySelectorAll('.volume-preset').forEach(btn=>btn.addEventListener('click',()=>{const vol=parseFloat(btn.dataset.volume);dom.audio.volume=vol;state.volume=vol;saveData();$('volumeSlider').value=vol;updateVolumeDisplay();}));
             $('jumpPrev').onclick=()=>{if(state.lyricIndex>0){dom.audio.currentTime=state.lyrics[state.lyricIndex-1].time+.1;}};
@@ -1567,11 +1579,13 @@
                 const cb=document.querySelector(`[data-src="${src}"]`);
                 if(cb)cb.checked=state.enabledSources[src];
             });
+            $('limitSelect').value=state.perLimit;
             $('qualitySelect').value=state.quality;
             dom.audio.volume=state.volume;
             $('volumeSlider').value=state.volume;
             updateModeUI();
             updateVolumeDisplay();
+            
             loadDefault();
         }
         document.addEventListener('DOMContentLoaded',setup);
