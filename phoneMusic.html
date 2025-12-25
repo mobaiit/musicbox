@@ -200,10 +200,10 @@
 
     <!-- 来源选择 -->
     <div class="sourcebar">
-        <label><input type="checkbox" data-src="migu" checked>咪咕</label>
+        <label><input type="checkbox" data-src="migu">咪咕</label>
         <label><input type="checkbox" data-src="netease" checked>网易云</label>
-        <label><input type="checkbox" data-src="qq" checked>QQ</label>
-        <label><input type="checkbox" data-src="kuwo" checked>酷我</label>
+        <label><input type="checkbox" data-src="qq">QQ</label>
+        <label><input type="checkbox" data-src="kuwo">酷我</label>
     </div>
 
     <!-- 中间 -->
@@ -255,18 +255,70 @@
 
 <script>
     (function(){
-        const state={enabledSources:{migu:true,netease:true,qq:true,kuwo:true},perLimit:10,keyword:'',results:[],favorites:[],playlists:[],current:null,playing:false,mode:'list',lyrics:[],lyricIndex:-1,noMore:false};
+        const state={
+            enabledSources:{migu:false,netease:true,qq:false,kuwo:false},
+            perLimit:20,
+            keyword:'',
+            results:[],
+            favorites:[],
+            playlists:[],
+            current:null,
+            playing:false,
+            mode:'list',
+            lyrics:[],
+            lyricIndex:-1,
+            noMore:false,
+            isSearching:false
+        };
         const dom={};
         function $(id){return document.getElementById(id);}
-        function toast(msg){const el=document.createElement('div');el.style.cssText="position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:6px 14px;border-radius:14px;font-size:12px;z-index:200";el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1500);}
-        function fmt(s){if(!isFinite(s)||s<0)s=0;const m=Math.floor(s/60);const sec=Math.floor(s%60);return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
+        function toast(msg){
+            const el=document.createElement('div');
+            el.style.cssText="position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:6px 14px;border-radius:14px;font-size:12px;z-index:200";
+            el.textContent=msg;
+            document.body.appendChild(el);
+            setTimeout(()=>el.remove(),1500);
+        }
+        function fmt(s){
+            if(!isFinite(s)||s<0)s=0;
+            const m=Math.floor(s/60);
+            const sec=Math.floor(s%60);
+            return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+        }
         function setLoading(v){$('loading').style.display=v?'block':'none';}
+        
+        // 加载默认网易云推荐（不输入搜索时）
+        async function loadDefault(){
+            if(state.keyword) return;
+            setLoading(true);
+            state.isSearching=true;
+            try{
+                const url=`https://api-v1.cenguigui.cn/api/music/netease/WyY_Dg.php?type=json&msg=热歌榜&num=${state.perLimit}&n=`;
+                const res=await fetch(url);
+                const j=await res.json();
+                if(j.code===200&&Array.isArray(j.data)){
+                    j.data.forEach(it=>{
+                        const uid=`netease-${it.songid}`;
+                        if(state.results.find(t=>t.uid===uid))return;
+                        state.results.push({
+                            uid,source:'netease',songid:it.songid,
+                            title:it.title,singer:it.singer,
+                            cover:null,url:null,lrc:null,done:false
+                        });
+                    });
+                }
+            }catch(e){}
+            setLoading(false);
+            state.isSearching=false;
+            renderList();
+        }
+        
         async function searchAll(reset){
-            if(!state.keyword){toast('请输入关键词');return;}
             if(reset){state.results=[];state.noMore=false;}
             const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
             if(!enabled.length){toast('请至少选择一个来源');return;}
             setLoading(true);
+            state.isSearching=true;
             const tasks=enabled.map(src=>{
                 if(src==='migu')return searchMigu(state.keyword,state.perLimit);
                 if(src==='netease')return searchNetease(state.keyword,state.perLimit);
@@ -275,6 +327,7 @@
             let added=0;
             try{const res=await Promise.all(tasks);added=res.reduce((a,b)=>a+b,0);}catch(e){toast('搜索出错');}
             setLoading(false);
+            state.isSearching=false;
             if(!reset&&added===0){state.noMore=true;toast('没有更多了');}
             renderList();
         }
@@ -303,7 +356,7 @@
           <div class="artist"><span class="source-tag source-${tr.source}">${srcTag}</span>${tr.singer||''}</div>
         </div>
         <button class="playbtn">▶</button>
-      `;row.querySelector('.playbtn').onclick=async()=>{await playTrack(tr);};row.onclick=()=>row.querySelector('.playbtn').click();wrap.appendChild(row);});if(!state.current&&list.length)playTrack(list[0]);}
+      `;row.querySelector('.playbtn').onclick=async()=>{await playTrack(tr);};row.onclick=()=>row.querySelector('.playbtn').click();wrap.appendChild(row);});}
         async function playTrack(track){
             state.current=track;await ensureDetail(track);if(!track.url){toast('播放失败');return;}
             $('audio').src=track.url;$('audio').play();state.playing=true;updateUI();
@@ -313,15 +366,57 @@
             const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';$('artist').textContent=tr?tr.singer:'';const cover=tr&&tr.cover?tr.cover:'';$('cover').src=cover;$('cover').style.display=tr&&tr.cover?'block':'none';$('playBtn').textContent=state.playing?'⏸':'▶';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.playlists.flatMap(p=>p.tracks)];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});}
         function renderLyrics(){
             const wrap=$('lyricsScroll');wrap.innerHTML='';if(!state.lyrics.length){wrap.innerHTML='<div style="margin-top:30px;color:var(--text-sub)">暂无歌词</div>';return;}
-            state.lyrics.forEach((l,i)=>{const div=document.createElement('div');div.textContent=l.text;div.dataset.idx=i;wrap.appendChild(div);});state.lyricIndex=-1;
+            state.lyrics.forEach((l,i)=>{const div=document.createElement('div');div.textContent=l.text;div.dataset.idx=i;div.dataset.time=l.time;wrap.appendChild(div);});
+            state.lyricIndex=-1;
             /* 顶部信息同步 */
             $('lyricsTitle').textContent=state.current?state.current.title:'--';
             $('lyricsArtist').textContent=state.current?state.current.singer:'--';
         }
         function updateLyrics(time){
             if(!state.lyrics.length)return;let idx=state.lyrics.findIndex((l,i)=>{const next=state.lyrics[i+1];return time>=l.time&&(next?time<next.time:true);});if(idx<0||idx===state.lyricIndex)return;state.lyricIndex=idx;document.querySelectorAll('.lyrics-scroll div').forEach((el,i)=>el.classList.toggle('active',i===idx));const active=$('lyricsScroll').querySelector('.active');if(active)active.scrollIntoView({block:'center',behavior:'smooth'});}
+        
+        // 歌词滑动定位
+        let lyricTouchStartY=0,lyricTouchStartTime=0;
+        $('lyricsScroll').addEventListener('touchstart',e=>{
+            lyricTouchStartY=e.touches[0].clientY;
+            lyricTouchStartTime=Date.now();
+        });
+        $('lyricsScroll').addEventListener('touchend',e=>{
+            if(!state.lyrics.length)return;
+            const dy=e.changedTouches[0].clientY-lyricTouchStartY;
+            const dt=Date.now()-lyricTouchStartTime;
+            if(Math.abs(dy)>10&&dt<300){
+                const active=$('lyricsScroll').querySelector('.active');
+                if(!active)return;
+                const idx=parseInt(active.dataset.idx);
+                let targetIdx=idx;
+                if(dy<-30)targetIdx=Math.min(idx+3,state.lyrics.length-1);
+                if(dy>30)targetIdx=Math.max(idx-3,0);
+                if(targetIdx!==idx){
+                    const t=state.lyrics[targetIdx].time;
+                    $('audio').currentTime=t;
+                }
+            }
+        });
+        
         function toggleFav(){if(!state.current)return;const idx=state.favorites.findIndex(t=>t.uid===state.current.uid);if(idx>=0){state.favorites.splice(idx,1);toast('已取消收藏');}else{state.favorites.push(state.current);toast('已收藏');}updateUI();}
         function nextTrack(dir){const tab=document.querySelector('.tab.active').dataset.tab;let list=[];if(tab==='results')list=state.results;else if(tab==='favorites')list=state.favorites;else{const pl=state.playlists.find(p=>p.id===(state.playContext.playlistId||''));list=pl?pl.tracks:[];}if(!list.length)return;let idx=list.findIndex(t=>t.uid===state.current.uid);if(idx<0)idx=0;if(state.mode==='single'){$('audio').currentTime=0;$('audio').play();return;}if(state.mode==='shuffle'){if(list.length===1)idx=0;else{let n;do{n=Math.floor(Math.random()*list.length);}while(n===idx);idx=n;}}else{idx=(idx+(dir==='prev'?-1:1)+list.length)%list.length;}playTrack(list[idx]);}
+        
+        // 滑动加载
+        let scrollTimer=null;
+        $('scroll').addEventListener('scroll',()=>{
+            if(state.isSearching||state.noMore)return;
+            clearTimeout(scrollTimer);
+            scrollTimer=setTimeout(()=>{
+                const sh=$('scroll').scrollHeight;
+                const st=$('scroll').scrollTop;
+                const ch=$('scroll').clientHeight;
+                if(sh-st-ch<100){
+                    searchAll(false);
+                }
+            },200);
+        });
+        
         function setup(){
             dom.audio=$('audio');dom.searchInput=$('searchInput');dom.playBtn=$('playBtn');dom.prevBtn=$('prevBtn');dom.nextBtn=$('nextBtn');dom.favBtn=$('favBtn');dom.progressBar=$('progressBar');dom.lyricsMask=$('lyricsMask');dom.lyricsPanel=$('lyricsPanel');dom.lyricsScroll=$('lyricsScroll');dom.lyricsClose=$('lyricsClose');
             dom.searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){state.keyword=dom.searchInput.value.trim();searchAll(true);}});
@@ -346,7 +441,7 @@
             /* 上一句/下一句按钮（UI 预留） */
             $('jumpPrev').onclick=()=>{if(state.lyricIndex>0){dom.audio.currentTime=state.lyrics[state.lyricIndex-1].time+.1;}};
             $('jumpNext').onclick=()=>{if(state.lyricIndex<state.lyrics.length-1){dom.audio.currentTime=state.lyrics[state.lyricIndex+1].time+.1;}};
-            renderList();
+            loadDefault();
         }
         document.addEventListener('DOMContentLoaded',setup);
     })();
