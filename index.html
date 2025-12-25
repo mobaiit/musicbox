@@ -131,6 +131,10 @@
             gap:8px;
             z-index:104;
         }
+        .lyrics-view.show ~ .full-player-opacity-control,
+        .playlist-view[style*="flex"] ~ .full-player-opacity-control{
+            display:none;
+        }
         .full-opacity-slider{
             width:80px;
             height:4px;
@@ -1336,8 +1340,8 @@
             });
             $('fullPlayerOpacitySlider').addEventListener('input',()=>{const opacity=parseFloat($('fullPlayerOpacitySlider').value);$('fullPlayerPanel').style.background=`linear-gradient(135deg,rgba(26,26,46,${opacity}),rgba(26,31,58,${opacity}))`;});
             $('playlistOpacitySlider').addEventListener('input',()=>{const opacity=parseFloat($('playlistOpacitySlider').value);$('playlistView').style.background=`rgba(26,26,46,${opacity})`;});
-            dom.fullListBtn.addEventListener('click',()=>{renderPlaylist();$('playlistView').style.display='flex';});
-            $('playlistBackBtn').addEventListener('click',()=>{$('playlistView').style.display='none';});
+            dom.fullListBtn.addEventListener('click',()=>{renderPlaylist();$('playlistView').style.display='flex';$('fullPlayerOpacitySlider').parentElement.style.display='none';});
+            $('playlistBackBtn').addEventListener('click',()=>{$('playlistView').style.display='none';$('fullPlayerOpacitySlider').parentElement.style.display='flex';});
             $('clearPlaylistBtn').addEventListener('click',()=>{state.history=[];saveData();renderPlaylist();toast('播放历史已清空');});
             $('playlistModeBtn').addEventListener('click',()=>{
                 if(state.mode==='list')state.mode='loop';
@@ -1446,11 +1450,13 @@
 
             function showLyrics() {
                 $('lyricsView').style.display = 'flex';
+                $('fullPlayerOpacitySlider').parentElement.style.display = 'none';
                 setTimeout(() => $('lyricsView').classList.add('show'), 10);
             }
 
             function hideLyrics() {
                 $('lyricsView').classList.remove('show');
+                $('fullPlayerOpacitySlider').parentElement.style.display = 'flex';
                 setTimeout(() => $('lyricsView').style.display = 'none', 300);
             }
 
@@ -1507,6 +1513,7 @@
                 hideLyrics();
                 $('volumePanel').style.display='none';
                 $('playlistView').style.display='none';
+                $('fullPlayerOpacitySlider').parentElement.style.display='flex';
             }
 
             // 键盘快捷键
