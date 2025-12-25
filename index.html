@@ -936,180 +936,56 @@
             opacity:1;
         }
 
-        /* 手机端图标大小优化 - 全面兼容 */
-        @media (max-width: 768px), (-webkit-min-device-pixel-ratio: 2) {
-            /* 强制设置所有图标容器和图标本身的尺寸 */
-            .searchbar .search .icon,
-            .searchbar .search .icon svg,
-            .searchbar .search .icon [data-lucide] {
-                font-size: 24px !important;
-                width: 24px !important;
-                height: 24px !important;
-                min-width: 24px !important;
-                min-height: 24px !important;
+        /* 手机端图标大小优化 - 平衡尺寸 */
+        @media (max-width: 768px) {
+            .searchbar .search .icon svg {
+                width: 20px !important;
+                height: 20px !important;
             }
             
-            .player .controls button,
-            .player .controls button svg,
-            .player .controls button [data-lucide] {
-                font-size: 22px !important;
+            .player .controls button svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
+            
+            .player .menu-btn svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
+            
+            .close-btn svg {
                 width: 22px !important;
                 height: 22px !important;
-                min-width: 22px !important;
-                min-height: 22px !important;
             }
             
-            .player .menu-btn,
-            .player .menu-btn svg,
-            .player .menu-btn [data-lucide] {
-                font-size: 22px !important;
-                width: 22px !important;
-                height: 22px !important;
-                min-width: 22px !important;
-                min-height: 22px !important;
+            .control-btn svg {
+                width: 28px !important;
+                height: 28px !important;
             }
             
-            .close-btn,
-            .close-btn svg,
-            .close-btn [data-lucide] {
-                font-size: 26px !important;
-                width: 26px !important;
-                height: 26px !important;
-                min-width: 26px !important;
-                min-height: 26px !important;
+            .play-btn svg {
+                width: 36px !important;
+                height: 36px !important;
             }
             
-            .control-btn,
-            .control-btn svg,
-            .control-btn [data-lucide] {
-                font-size: 32px !important;
-                width: 32px !important;
-                height: 32px !important;
-                min-width: 32px !important;
-                min-height: 32px !important;
+            .action-btn svg {
+                width: 20px !important;
+                height: 20px !important;
             }
             
-            .play-btn,
-            .play-btn svg,
-            .play-btn [data-lucide] {
-                font-size: 44px !important;
-                width: 44px !important;
-                height: 44px !important;
-                min-width: 44px !important;
-                min-height: 44px !important;
+            .lyrics-play-btn svg {
+                width: 28px !important;
+                height: 28px !important;
             }
             
-            .action-btn,
-            .action-btn svg,
-            .action-btn [data-lucide] {
-                font-size: 26px !important;
-                width: 26px !important;
-                height: 26px !important;
-                min-width: 26px !important;
-                min-height: 26px !important;
+            .playlist-mode-btn svg {
+                width: 18px !important;
+                height: 18px !important;
             }
             
-            .lyrics-play-btn,
-            .lyrics-play-btn svg,
-            .lyrics-play-btn [data-lucide] {
-                font-size: 32px !important;
-                width: 32px !important;
-                height: 32px !important;
-                min-width: 32px !important;
-                min-height: 32px !important;
-            }
-            
-            .playlist-mode-btn,
-            .playlist-mode-btn svg,
-            .playlist-mode-btn [data-lucide] {
-                font-size: 22px !important;
-                width: 22px !important;
-                height: 22px !important;
-                min-width: 22px !important;
-                min-height: 22px !important;
-            }
-            
-            .track .playbtn,
-            .track .playbtn svg,
-            .track .playbtn [data-lucide] {
-                font-size: 22px !important;
-                width: 22px !important;
-                height: 22px !important;
-                min-width: 22px !important;
-                min-height: 22px !important;
-            }
-            
-            /* 通用图标强制设置 */
-            svg[data-lucide],
-            [data-lucide] svg,
-            i[data-lucide] {
-                stroke-width: 2.5 !important;
-                display: inline-block !important;
-                vertical-align: middle !important;
-            }
-            
-            /* 按钮容器也要相应增大 */
-            .player .controls button {
-                width: 40px !important;
-                height: 40px !important;
-                min-width: 40px !important;
-                min-height: 40px !important;
-            }
-            
-            .player .menu-btn {
-                width: 40px !important;
-                height: 40px !important;
-                min-width: 40px !important;
-                min-height: 40px !important;
-            }
-            
-            .close-btn {
-                width: 48px !important;
-                height: 48px !important;
-                min-width: 48px !important;
-                min-height: 48px !important;
-            }
-            
-            .control-btn {
-                width: 64px !important;
-                height: 64px !important;
-                min-width: 64px !important;
-                min-height: 64px !important;
-            }
-            
-            .play-btn {
-                width: 80px !important;
-                height: 80px !important;
-                min-width: 80px !important;
-                min-height: 80px !important;
-            }
-            
-            .action-btn {
-                width: 56px !important;
-                height: 56px !important;
-                min-width: 56px !important;
-                min-height: 56px !important;
-            }
-            
-            .lyrics-play-btn {
-                width: 64px !important;
-                height: 64px !important;
-                min-width: 64px !important;
-                min-height: 64px !important;
-            }
-            
-            .playlist-mode-btn {
-                width: 48px !important;
-                height: 48px !important;
-                min-width: 48px !important;
-                min-height: 48px !important;
-            }
-            
-            .track .playbtn {
-                width: 40px !important;
-                height: 40px !important;
-                min-width: 40px !important;
-                min-height: 40px !important;
+            .track .playbtn svg {
+                width: 18px !important;
+                height: 18px !important;
             }
         }
     </style>
