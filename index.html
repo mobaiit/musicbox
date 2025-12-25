@@ -935,6 +935,42 @@
             display:block;
             opacity:1;
         }
+        
+        /* 手机端图标大小优化 */
+        @media (max-width: 768px) {
+            .searchbar .search .icon {
+                font-size: 18px;
+                width: 24px;
+                height: 24px;
+            }
+            .player .controls button {
+                font-size: 18px;
+            }
+            .player .menu-btn {
+                font-size: 18px;
+            }
+            .close-btn {
+                font-size: 20px;
+            }
+            .control-btn {
+                font-size: 26px;
+            }
+            .play-btn {
+                font-size: 36px;
+            }
+            .action-btn {
+                font-size: 20px;
+            }
+            .lyrics-play-btn {
+                font-size: 26px;
+            }
+            .playlist-mode-btn {
+                font-size: 18px;
+            }
+            .track .playbtn {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1258,16 +1294,16 @@
             if(kw&&!state.searchHistory.includes(kw)){state.searchHistory.unshift(kw);state.searchHistory=state.searchHistory.slice(0,10);saveData();}
             const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
             if(!enabled.length){toast('请至少选择一个来源');return;}
-            
+
             // 检查是否有支持无关键词搜索的源
             const supportsEmpty=['migu','netease'];
             const hasEmptySupport=enabled.some(src=>supportsEmpty.includes(src));
-            
+
             if(!kw&&!hasEmptySupport){
                 toast('请输入搜索关键词');
                 return;
             }
-            
+
             setLoading(true);
             state.isSearching=true;
             const tasks=enabled.map(src=>{
@@ -1710,7 +1746,7 @@
                 const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
                 const supportsEmpty=['migu','netease'];
                 const hasEmptySupport=enabled.some(src=>supportsEmpty.includes(src));
-                
+
                 if(state.keyword||hasEmptySupport){
                     searchAll(true);
                 }else{
@@ -1718,9 +1754,9 @@
                 }
                 $('searchHistory').classList.remove('show');
             }
-            
+
             dom.searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){performSearch();}});
-            
+
             // 搜索按钮点击事件 - 使用多种方式绑定
             document.addEventListener('click', e => {
                 if(e.target.id === 'searchIcon' || e.target.closest('#searchIcon')) {
@@ -1765,18 +1801,18 @@
                     const fullPlayerPanel = $('fullPlayerPanel');
                     const styles = ['', 'alt-style', 'alt-style-1', 'alt-style-2', 'alt-style-3', 'alt-style-4', 'alt-style-5'];
                     const names = ['默认样式', 'Spotify风格', 'Apple Music风格', 'YouTube Music风格', 'Tidal风格', '网易云风格', 'QQ音乐风格'];
-                    
+
                     // 移除所有样式类
                     styles.forEach(style => {
                         if(style) fullPlayerPanel.classList.remove(style);
                     });
-                    
+
                     // 切换到下一个样式
                     state.lyricsStyle = (state.lyricsStyle + 1) % styles.length;
                     if(styles[state.lyricsStyle]) {
                         fullPlayerPanel.classList.add(styles[state.lyricsStyle]);
                     }
-                    
+
                     toast(`切换到${names[state.lyricsStyle]}`);
                 } else {
                     // 手机端显示歌词页面
@@ -1888,18 +1924,18 @@
                 const lyricsView = $('lyricsView');
                 const styles = ['', 'alt-style', 'alt-style-1', 'alt-style-2', 'alt-style-3', 'alt-style-4', 'alt-style-5'];
                 const names = ['默认样式', 'Spotify风格', 'Apple Music风格', 'YouTube Music风格', 'Tidal风格', '网易云风格', 'QQ音乐风格'];
-                
+
                 // 移除所有样式类
                 styles.forEach(style => {
                     if(style) lyricsView.classList.remove(style);
                 });
-                
+
                 // 切换到下一个样式
                 state.lyricsStyle = (state.lyricsStyle + 1) % styles.length;
                 if(styles[state.lyricsStyle]) {
                     lyricsView.classList.add(styles[state.lyricsStyle]);
                 }
-                
+
                 toast(`切换到${names[state.lyricsStyle]}`);
             });
 
