@@ -48,9 +48,15 @@
         .search-history-btn{margin:4px 8px 4px 0;padding:4px 12px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.1);color:var(--text-main);font-size:12px;cursor:pointer;}
 
         /* 来源选择条 */
-        .sourcebar{flex-shrink:0;display:flex;gap:8px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-size:12px;color:var(--text-sub);justify-content:center;}
+        .sourcebar{flex-shrink:0;display:flex;gap:8px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-size:12px;color:var(--text-sub);justify-content:space-between;align-items:center;}
+        .sourcebar .sources{display:flex;gap:8px;}
         .sourcebar label{display:flex;align-items:center;gap:4px;}
         .sourcebar input{margin:0;width:12px;height:12px;accent-color:var(--accent);}
+        .sourcebar .quality-wrapper{display:flex;align-items:center;gap:6px;}
+        .sourcebar select{background:#000;color:var(--text-main);border:1px solid var(--border);border-radius:8px;padding:3px 6px;font-size:11px;outline:none;}
+        .sourcebar select option[value="standard"]{color:#4caf50;}
+        .sourcebar select option[value="high"]{color:#4dd0e1;}
+        .sourcebar select option[value="lossless"]{color:#ffb74d;}
 
         /* 中间内容区 */
         .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -86,7 +92,11 @@
         .player .play-overlay button{width:24px;height:24px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,107,107,0.4);}
         .player .info{flex:1;min-width:0;margin-right:12px;}
         .player .title{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-        .player .artist{font-size:12px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .player .artist{font-size:12px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
+        .player .quality-tag{font-size:10px;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.5);}
+        .player .quality-standard{color:#4caf50;}
+        .player .quality-high{color:#4dd0e1;}
+        .player .quality-lossless{color:#ffb74d;}
         .player .controls{display:flex;align-items:center;gap:8px;}
         .player .controls button{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:var(--text-main);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
         .player .controls button:active{transform:scale(0.95);}
@@ -156,20 +166,33 @@
             align-items:center;
             justify-content:center;
         }
-        .song-info{
-            flex:1;
+        .full-player-song-info{
             text-align:center;
-            margin:0 16px;
+            padding:0 24px;
+            margin-bottom:16px;
         }
-        .full-title{
-            font-size:16px;
+        .full-player-song-info .full-title{
+            font-size:18px;
             font-weight:600;
-            margin-bottom:4px;
+            margin-bottom:6px;
         }
-        .full-artist{
-            font-size:13px;
+        .full-player-song-info .full-artist{
+            font-size:14px;
             color:var(--text-sub);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
         }
+        .full-quality-tag{
+            font-size:11px;
+            padding:2px 6px;
+            border-radius:4px;
+            background:rgba(0,0,0,.6);
+        }
+        .full-quality-standard{color:#4caf50;}
+        .full-quality-high{color:#4dd0e1;}
+        .full-quality-lossless{color:#ffb74d;}
         .full-player-cover{
             flex:1;
             display:flex;
@@ -419,19 +442,7 @@
             font-size:12px;
             color:var(--text-sub);
         }
-        .playlist-item .download-btn{
-            width:32px;
-            height:32px;
-            border-radius:50%;
-            border:none;
-            background:rgba(255,255,255,.1);
-            color:var(--text-sub);
-            font-size:14px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            margin-left:8px;
-        }
+
 
         /* 歌词视图 */
         .lyrics-view{
@@ -592,10 +603,20 @@
 
     <!-- 来源选择 -->
     <div class="sourcebar">
-        <label><input type="checkbox" data-src="migu">咪咕</label>
-        <label><input type="checkbox" data-src="netease" checked>网易云</label>
-        <label><input type="checkbox" data-src="qq">QQ</label>
-        <label><input type="checkbox" data-src="kuwo">酷我</label>
+        <div class="sources">
+            <label><input type="checkbox" data-src="migu">咪咕</label>
+            <label><input type="checkbox" data-src="netease" checked>网易云</label>
+            <label><input type="checkbox" data-src="qq">QQ</label>
+            <label><input type="checkbox" data-src="kuwo">酷我</label>
+        </div>
+        <div class="quality-wrapper">
+            <span>音质:</span>
+            <select id="qualitySelect">
+                <option value="standard">标准</option>
+                <option value="high" selected>高品质</option>
+                <option value="lossless">无损</option>
+            </select>
+        </div>
     </div>
 
     <!-- 搜索栏 -->
@@ -654,14 +675,15 @@
     </div>
     <div class="full-player-header">
         <button id="fullPlayerClose" class="close-btn">↓</button>
-        <div class="song-info">
-            <div id="fullTitle" class="full-title">--</div>
-            <div id="fullArtist" class="full-artist">--</div>
-        </div>
+        <div style="width:40px;"></div>
         <div style="width:40px;"></div>
     </div>
     <div class="full-player-cover">
         <img id="fullCover" class="rotating-cover" src="">
+    </div>
+    <div class="full-player-song-info">
+        <div id="fullTitle" class="full-title">--</div>
+        <div id="fullArtist" class="full-artist">--</div>
     </div>
     <div class="full-player-progress">
         <span id="currentTime" class="time">00:00</span>
@@ -789,12 +811,13 @@
             volume:0.7,
             muted:false,
             selectedTracks:[],
-            batchMode:false
+            batchMode:false,
+            quality:'high'
         };
 
         // 本地存储
-        function saveData(){localStorage.setItem('musicbox',JSON.stringify({favorites:state.favorites,history:state.history,searchHistory:state.searchHistory,enabledSources:state.enabledSources,mode:state.mode,volume:state.volume}));}
-        function loadData(){try{const d=JSON.parse(localStorage.getItem('musicbox')||'{}');Object.assign(state,d);if(!state.history)state.history=[];if(!state.searchHistory)state.searchHistory=[];}catch(e){}}
+        function saveData(){localStorage.setItem('musicbox',JSON.stringify({favorites:state.favorites,history:state.history,searchHistory:state.searchHistory,enabledSources:state.enabledSources,mode:state.mode,volume:state.volume,quality:state.quality}));}
+        function loadData(){try{const d=JSON.parse(localStorage.getItem('musicbox')||'{}');Object.assign(state,d);if(!state.history)state.history=[];if(!state.searchHistory)state.searchHistory=[];if(!state.quality)state.quality='high';}catch(e){}}
         const dom={};
         function $(id){return document.getElementById(id);}
         function toast(msg){
@@ -877,8 +900,8 @@
         }
         async function ensureDetail(track){
             if(track.done&&track.url)return;
-            if(track.source==='migu'){const url=`https://api-v1.cenguigui.cn/api/mg_music/?msg=${encodeURIComponent(track.title)}&n=1&type=json&br=1`;const res=await fetch(url);const j=await res.json();if(j.code===200&&j.data){track.url=j.data.music_url;track.cover=j.data.cover;track.lrc=j.data.lrc_url?await(await fetch(j.data.lrc_url)).text():null;track.done=true;}}
-            if(track.source==='netease'){const url=`https://api.cenguigui.cn/api/netease/music_v1.php?id=${track.songid}&type=json&level=lossless`;const res=await fetch(url);const j=await res.json();if(j.code===200&&j.data){track.url=j.data.url;track.cover=j.data.pic;track.lrc=j.data.lyric;track.done=true;}}
+            if(track.source==='migu'){const br=state.quality==='lossless'?'1':state.quality==='high'?'2':'3';const url=`https://api-v1.cenguigui.cn/api/mg_music/?msg=${encodeURIComponent(track.title)}&n=1&type=json&br=${br}`;const res=await fetch(url);const j=await res.json();if(j.code===200&&j.data){track.url=j.data.music_url;track.cover=j.data.cover;track.lrc=j.data.lrc_url?await(await fetch(j.data.lrc_url)).text():null;track.done=true;}}
+            if(track.source==='netease'){const level=state.quality==='lossless'?'lossless':state.quality==='high'?'exhigh':'standard';const url=`https://api.cenguigui.cn/api/netease/music_v1.php?id=${track.songid}&type=json&level=${level}`;const res=await fetch(url);const j=await res.json();if(j.code===200&&j.data){track.url=j.data.url;track.cover=j.data.pic;track.lrc=j.data.lyric;track.done=true;}}
         }
         function parseLRC(txt){if(!txt)return[];const lines=txt.split(/\r?\n/);const reg=/\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\]/;const out=[];lines.forEach(line=>{const m=reg.exec(line);if(!m)return;const time=parseInt(m[1])*60+parseInt(m[2])+((m[3]?parseInt(m[3].padEnd(3,'0')):0)/1000);const text=line.replace(reg,'').trim();if(text)out.push({time,text});});out.sort((a,b)=>a.time-b.time);return out;}
         function renderSearchHistory(){
@@ -957,7 +980,7 @@
                 updateUI();
             }
         }
-        function updateUI(){const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';$('artist').textContent=tr?tr.singer:'点击选择音乐';if($('fullTitle'))$('fullTitle').textContent=tr?tr.title:'--';if($('fullArtist'))$('fullArtist').textContent=tr?tr.singer:'--';const cover=tr&&tr.cover?tr.cover:'';$('cover').src=cover;$('cover').style.display=tr&&tr.cover?'block':'none';if($('fullCover'))$('fullCover').src=cover||'';$('playBtn').textContent=state.playing?'⏸':'▶';$('playPauseBtn').textContent=state.playing?'⏸':'▶';if($('fullPlayBtn'))$('fullPlayBtn').textContent=state.playing?'⏸':'▶';if($('lyricsPlayBtn'))$('lyricsPlayBtn').textContent=state.playing?'⏸':'▶';const isFav=tr&&state.favorites.find(f=>f.uid===tr.uid);if($('fullFavBtn'))$('fullFavBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';$('favBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.history];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});document.querySelectorAll('.playbtn').forEach(btn=>{const trackRow=btn.closest('.track');if(trackRow){const isCurrentTrack=state.current&&trackRow.querySelector('.title').textContent===state.current.title;btn.textContent=isCurrentTrack&&state.playing?'⏸':'▶';}});$('player').classList.toggle('show',!!tr);}
+        function updateUI(){const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';const artistText=tr?tr.singer:'点击选择音乐';const qualityText=tr?state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准':'';const qualityClass=tr?`quality-${state.quality}`:'';$('artist').innerHTML=tr?`${artistText} <span class="quality-tag ${qualityClass}">${qualityText}</span>`:artistText;if($('fullTitle'))$('fullTitle').textContent=tr?tr.title:'--';if($('fullArtist'))$('fullArtist').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';const cover=tr&&tr.cover?tr.cover:'';$('cover').src=cover;$('cover').style.display=tr&&tr.cover?'block':'none';if($('fullCover'))$('fullCover').src=cover||'';$('playBtn').textContent=state.playing?'⏸':'▶';$('playPauseBtn').textContent=state.playing?'⏸':'▶';if($('fullPlayBtn'))$('fullPlayBtn').textContent=state.playing?'⏸':'▶';if($('lyricsPlayBtn'))$('lyricsPlayBtn').textContent=state.playing?'⏸':'▶';const isFav=tr&&state.favorites.find(f=>f.uid===tr.uid);if($('fullFavBtn'))$('fullFavBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';$('favBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.history];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});document.querySelectorAll('.playbtn').forEach(btn=>{const trackRow=btn.closest('.track');if(trackRow){const isCurrentTrack=state.current&&trackRow.querySelector('.title').textContent===state.current.title;btn.textContent=isCurrentTrack&&state.playing?'⏸':'▶';}});$('player').classList.toggle('show',!!tr);}
         function renderLyrics(){
             const wrap=$('lyricsScroll');
             wrap.innerHTML='';
@@ -995,7 +1018,7 @@
                 if(state.batchMode)item.classList.add('batch-mode');
                 if(state.current&&state.current.uid===tr.uid)item.classList.add('active');
                 const isSelected=state.selectedTracks.includes(tr.uid);
-                item.innerHTML=`<input type="checkbox" class="checkbox" ${isSelected?'checked':''}><div class="index">${idx+1}</div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist">${tr.singer||''}</div></div><button class="download-btn">⬇</button>`;
+                item.innerHTML=`<input type="checkbox" class="checkbox" ${isSelected?'checked':''}><div class="index">${idx+1}</div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist">${tr.singer||''}</div></div>`;
                 
                 const checkbox=item.querySelector('.checkbox');
                 checkbox.onchange=()=>{
@@ -1009,11 +1032,8 @@
                     if($('selectAllBtn'))$('selectAllBtn').textContent=allSelected?'取消全选':'全选';
                 };
                 
-                const downloadBtn=item.querySelector('.download-btn');
-                downloadBtn.onclick=async(e)=>{e.stopPropagation();await downloadTrack(tr);};
-                
                 if(!state.batchMode){
-                    item.onclick=async(e)=>{if(e.target===downloadBtn||e.target===checkbox)return;await playTrack(tr);renderPlaylist();};
+                    item.onclick=async(e)=>{if(e.target===checkbox)return;await playTrack(tr);renderPlaylist();};
                 }
                 
                 wrap.appendChild(item);
@@ -1110,6 +1130,7 @@
             $('disclaimerClose').addEventListener('click',()=>{$('disclaimerModal').style.display='none';});
             $('disclaimerModal').addEventListener('click',e=>{if(e.target===$('disclaimerModal'))$('disclaimerModal').style.display='none';});
             document.querySelectorAll('.sourcebar input').forEach(cb=>cb.addEventListener('change',()=>{state.enabledSources[cb.dataset.src]=cb.checked;saveData();}));
+            $('qualitySelect').addEventListener('change',()=>{state.quality=$('qualitySelect').value;saveData();toast(`音质已切换至${state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准'}`);});
             document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===tab));renderList();}));
 
             dom.playBtn.addEventListener('click',async(e)=>{if(!state.current)return;if(state.current.url){if(dom.audio.paused){dom.audio.play();state.playing=true;}else{dom.audio.pause();state.playing=false;}updateUI();}else{await playTrack(state.current,e.target);}});
@@ -1324,6 +1345,7 @@
                 const cb=document.querySelector(`[data-src="${src}"]`);
                 if(cb)cb.checked=state.enabledSources[src];
             });
+            $('qualitySelect').value=state.quality;
             dom.audio.volume=state.volume;
             $('volumeSlider').value=state.volume;
             updateModeUI();
