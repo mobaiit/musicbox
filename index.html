@@ -145,8 +145,8 @@
 
         /* 进度条 */
         .progress{position:absolute;left:0;right:0;top:0;height:3px;background:rgba(255,255,255,.1);cursor:pointer;}
-        .progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#ff6b6b);transform-origin:left;transform:scaleX(0);border-radius:0 2px 2px 0;}
-        .progress .handle{position:absolute;top:50%;transform:translateY(-50%);width:12px;height:12px;background:var(--accent);border-radius:50%;left:0;box-shadow:0 2px 6px rgba(255,205,50,.5);opacity:0;transition:opacity .2s;}
+        .progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#ff6b6b);transform-origin:left;transform:scaleX(0);border-radius:0 2px 2px 0;will-change:transform;}
+        .progress .handle{position:absolute;top:50%;width:12px;height:12px;background:var(--accent);border-radius:50%;box-shadow:0 2px 6px rgba(255,205,50,.5);opacity:0;transition:opacity .2s;transform:translateY(-50%) translateX(-50%);will-change:transform;}
         .progress:hover .handle{opacity:1;}
 
         /* 全屏播放器面板 */
@@ -1430,7 +1430,7 @@
                 updateUI();
             }
         }
-        function updateUI(){const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';const artistText=tr?tr.singer:'点击选择音乐';const qualityText=tr?state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准':'';const qualityClass=tr?`quality-${state.quality}`:'';$('artist').innerHTML=tr?`${artistText} <span class="quality-tag ${qualityClass}">${qualityText}</span>`:artistText;if($('fullTitle'))$('fullTitle').textContent=tr?tr.title:'--';if($('fullArtist'))$('fullArtist').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';if($('fullTitlePC'))$('fullTitlePC').textContent=tr?tr.title:'--';if($('fullArtistPC'))$('fullArtistPC').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';const coverImg=$('cover');const coverPlaceholder=$('coverPlaceholder');const fullCoverImg=$('fullCover');const fullCoverPlaceholder=document.querySelector('.full-cover-placeholder');if(tr&&tr.cover){if(coverImg){coverImg.src=tr.cover;coverImg.style.display='block';coverImg.onerror=()=>{coverImg.style.display='none';if(coverPlaceholder)coverPlaceholder.style.display='flex';};}if(coverPlaceholder)coverPlaceholder.style.display='none';if(fullCoverImg){fullCoverImg.src=tr.cover;fullCoverImg.style.display='block';fullCoverImg.onerror=()=>{fullCoverImg.style.display='none';if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='block';};}if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='none';}else{if(coverImg)coverImg.style.display='none';if(coverPlaceholder)coverPlaceholder.style.display='flex';if(fullCoverImg)fullCoverImg.style.display='none';if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='block';}$('playPauseBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';if($('fullPlayBtn'))$('fullPlayBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';if($('lyricsPlayBtn'))$('lyricsPlayBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';const isFav=tr&&state.favorites.find(f=>f.uid===tr.uid);if($('fullFavBtn')){$('fullFavBtn').innerHTML=isFav?'<i data-lucide="heart" fill="#ff6b6b"></i>':'<i data-lucide="heart"></i>';$('fullFavBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';}$('favBtn').innerHTML=isFav?'<i data-lucide="heart" fill="#ff6b6b"></i>':'<i data-lucide="heart"></i>';$('favBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.history];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});document.querySelectorAll('.playbtn').forEach(btn=>{const trackRow=btn.closest('.track');if(trackRow){const isCurrentTrack=state.current&&trackRow.querySelector('.title').textContent===state.current.title;btn.innerHTML=isCurrentTrack&&state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';}});$('player').classList.toggle('show',!!tr);requestAnimationFrame(()=>lucide.createIcons());}
+        function updateUI(){const tr=state.current;$('title').textContent=tr?tr.title:'暂未选择歌曲';const artistText=tr?tr.singer:'点击选择音乐';const qualityText=tr?state.quality==='lossless'?'无损':state.quality==='high'?'高品质':'标准':'';const qualityClass=tr?`quality-${state.quality}`:'';$('artist').innerHTML=tr?`${artistText} <span class="quality-tag ${qualityClass}">${qualityText}</span>`:artistText;if($('fullTitle'))$('fullTitle').textContent=tr?tr.title:'--';if($('fullArtist'))$('fullArtist').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';if($('fullTitlePC'))$('fullTitlePC').textContent=tr?tr.title:'--';if($('fullArtistPC'))$('fullArtistPC').innerHTML=tr?`${tr.singer} <span class="full-quality-tag full-${qualityClass}">${qualityText}</span>`:'--';const coverImg=$('cover');const coverPlaceholder=$('coverPlaceholder');const fullCoverImg=$('fullCover');const fullCoverPlaceholder=document.querySelector('.full-cover-placeholder');if(tr&&tr.cover){if(coverImg){coverImg.src=tr.cover;coverImg.style.display='block';coverImg.onerror=()=>{coverImg.style.display='none';if(coverPlaceholder)coverPlaceholder.style.display='flex';};}if(coverPlaceholder)coverPlaceholder.style.display='none';if(fullCoverImg){fullCoverImg.src=tr.cover;fullCoverImg.style.display='block';fullCoverImg.onerror=()=>{fullCoverImg.style.display='none';if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='block';};}if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='none';}else{if(coverImg)coverImg.style.display='none';if(coverPlaceholder)coverPlaceholder.style.display='flex';if(fullCoverImg)fullCoverImg.style.display='none';if(fullCoverPlaceholder)fullCoverPlaceholder.style.display='block';}$('playPauseBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';if($('fullPlayBtn'))$('fullPlayBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';if($('lyricsPlayBtn'))$('lyricsPlayBtn').innerHTML=state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';const isFav=tr&&state.favorites.find(f=>f.uid===tr.uid);if($('fullFavBtn')){$('fullFavBtn').innerHTML=isFav?'<i data-lucide="heart" fill="#ff6b6b"></i>':'<i data-lucide="heart"></i>';$('fullFavBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';}$('favBtn').innerHTML=isFav?'<i data-lucide="heart" fill="#ff6b6b"></i>':'<i data-lucide="heart"></i>';$('favBtn').style.color=isFav?'#ff6b6b':'var(--text-main)';document.querySelectorAll('.track').forEach(el=>{const uid=state.current?state.current.uid:null;const list=[...state.results,...state.favorites,...state.history];const track=list.find(t=>t.uid===uid);el.classList.toggle('playing',track&&el.querySelector('.playbtn').onclick.toString().includes(track.uid));});document.querySelectorAll('.playbtn').forEach(btn=>{const trackRow=btn.closest('.track');if(trackRow){const isCurrentTrack=state.current&&trackRow.querySelector('.title').textContent===state.current.title;btn.innerHTML=isCurrentTrack&&state.playing?'<i data-lucide="pause"></i>':'<i data-lucide="play"></i>';}});$('player').classList.toggle('show',!!tr);renderIconsOptimized();}
         function renderLyrics(){
             const wrap=$('lyricsScroll');
             const inlineEl=$('inlineLyrics');
@@ -1730,6 +1730,14 @@
         function setup(){
             dom.audio=$('audio');dom.searchInput=$('searchInput');dom.playPauseBtn=$('playPauseBtn');dom.nextBtn=$('nextBtn');dom.progressBar=$('progressBar');dom.progressWrapper=$('progressWrapper');dom.progressHandle=$('progressHandle');dom.menuBtn=$('menuBtn');dom.fullPlayerMask=$('fullPlayerMask');dom.fullPlayerPanel=$('fullPlayerPanel');dom.fullPlayerClose=$('fullPlayerClose');dom.fullCover=$('fullCover');dom.fullPlayBtn=$('fullPlayBtn');dom.fullPrevBtn=$('fullPrevBtn');dom.fullNextBtn=$('fullNextBtn');dom.fullFavBtn=$('fullFavBtn');dom.fullModeBtn=$('fullModeBtn');dom.fullDownloadBtn=$('fullDownloadBtn');dom.fullLyricsBtn=$('fullLyricsBtn');dom.fullVolumeBtn=$('fullVolumeBtn');dom.fullProgressWrapper=$('fullProgressWrapper');dom.fullProgressBar=$('fullProgressBar');dom.fullProgressHandle=$('fullProgressHandle');dom.favBtn=$('favBtn');dom.fullListBtn=$('fullListBtn');
 
+            // 缓存进度条相关元素
+            progressElements.bar = dom.progressBar;
+            progressElements.handle = dom.progressHandle;
+            progressElements.fullBar = dom.fullProgressBar;
+            progressElements.fullHandle = dom.fullProgressHandle;
+            progressElements.currentTime = $('currentTime');
+            progressElements.totalTime = $('totalTime');
+
             // 搜索功能
             function performSearch(){
                 state.keyword=dom.searchInput.value.trim();
@@ -1953,7 +1961,11 @@
 
             document.addEventListener('mouseup',()=>{fullProgressDragging=false;});
             document.addEventListener('touchend',()=>{fullProgressDragging=false;});
-            dom.audio.addEventListener('timeupdate',()=>{const cur=dom.audio.currentTime||0;const dur=dom.audio.duration||0;const r=dur?cur/dur:0;dom.progressBar.style.transform='scaleX('+r+')';const w=dom.progressWrapper.clientWidth;dom.progressHandle.style.left=(w*r)+'px';if(dom.fullProgressBar){dom.fullProgressBar.style.transform='scaleX('+r+')';const fw=dom.fullProgressWrapper.clientWidth;dom.fullProgressHandle.style.left=(fw*r)+'px';}if($('currentTime'))$('currentTime').textContent=fmt(cur);if($('totalTime'))$('totalTime').textContent=fmt(dur);updateLyrics(cur);});
+            dom.audio.addEventListener('timeupdate', () => {
+                updateProgressBars();
+                updateTimeDisplay();
+                updateLyrics(dom.audio.currentTime || 0);
+            });
             dom.audio.addEventListener('ended',()=>nextTrack('next'));dom.audio.addEventListener('play',()=>{state.playing=true;updateUI();if(dom.fullCover)dom.fullCover.classList.remove('paused');});dom.audio.addEventListener('pause',()=>{state.playing=false;updateUI();if(dom.fullCover)dom.fullCover.classList.add('paused');});
 
             document.querySelectorAll('.controls button').forEach(btn=>btn.addEventListener('click',e=>e.stopPropagation()));
@@ -2097,26 +2109,77 @@
             loadDefault();
         }
 
-        // 优化图标渲染，避免频繁重新创建
+        // 缓存DOM元素引用
+        const progressElements = {
+            bar: null,
+            handle: null,
+            fullBar: null,
+            fullHandle: null,
+            currentTime: null,
+            totalTime: null
+        };
+
+        // 分离的进度条更新函数
+        function updateProgressBars() {
+            const cur = dom.audio.currentTime || 0;
+            const dur = dom.audio.duration || 0;
+            const r = dur ? cur / dur : 0;
+            
+            // 使用transform替代left属性，避免重排
+            if (progressElements.bar) {
+                progressElements.bar.style.transform = `scaleX(${r})`;
+            }
+            if (progressElements.handle) {
+                const w = dom.progressWrapper.clientWidth;
+                progressElements.handle.style.transform = `translateY(-50%) translateX(${w * r - 6}px)`;
+            }
+            if (progressElements.fullBar) {
+                progressElements.fullBar.style.transform = `scaleX(${r})`;
+            }
+            if (progressElements.fullHandle) {
+                const fw = dom.fullProgressWrapper.clientWidth;
+                progressElements.fullHandle.style.transform = `translateY(-50%) translateX(${fw * r - 8}px)`;
+            }
+        }
+
+        // 分离的时间显示更新函数
+        function updateTimeDisplay() {
+            const cur = dom.audio.currentTime || 0;
+            const dur = dom.audio.duration || 0;
+            
+            if (progressElements.currentTime) {
+                progressElements.currentTime.textContent = fmt(cur);
+            }
+            if (progressElements.totalTime) {
+                progressElements.totalTime.textContent = fmt(dur);
+            }
+        }
+
+        // 优化的图标渲染函数
         let iconRenderTimeout;
         function renderIconsOptimized() {
             if (iconRenderTimeout) clearTimeout(iconRenderTimeout);
             iconRenderTimeout = setTimeout(() => {
                 if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
+                    // 只渲染新添加的图标，而不是全部重新渲染
+                    const newIcons = document.querySelectorAll('i[data-lucide]:not([data-rendered])');
+                    if (newIcons.length > 0) {
+                        lucide.createIcons();
+                        newIcons.forEach(icon => icon.setAttribute('data-rendered', 'true'));
+                    }
                 }
-            }, 50);
+            }, 16); // 使用requestAnimationFrame的频率
         }
 
         document.addEventListener('DOMContentLoaded',()=>{
             setup();
+            // 初始化时一次性渲染所有图标
             if(typeof lucide !== 'undefined'){
                 lucide.createIcons();
-                const originalRenderList = renderList;
-                renderList = function(){
-                    originalRenderList();
-                    renderIconsOptimized();
-                };
+                // 标记所有初始图标为已渲染
+                document.querySelectorAll('i[data-lucide]').forEach(icon => {
+                    icon.setAttribute('data-rendered', 'true');
+                });
             }
         });
     })();
