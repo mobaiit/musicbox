@@ -1189,7 +1189,7 @@
 </div>
 
 <!-- 音频 -->
-<audio id="audio" preload="metadata"></audio>
+<audio id="audio" preload="none"></audio>
 
 <script>
     (function(){
@@ -1962,6 +1962,7 @@
             document.addEventListener('mouseup',()=>{fullProgressDragging=false;});
             document.addEventListener('touchend',()=>{fullProgressDragging=false;});
             dom.audio.addEventListener('timeupdate', () => {
+                if (!state.playing) return;
                 updateProgressBars();
                 updateTimeDisplay();
                 updateLyrics(dom.audio.currentTime || 0);
@@ -2124,7 +2125,7 @@
             const cur = dom.audio.currentTime || 0;
             const dur = dom.audio.duration || 0;
             const r = dur ? cur / dur : 0;
-            
+
             // 使用transform替代left属性，避免重排
             if (progressElements.bar) {
                 progressElements.bar.style.transform = `scaleX(${r})`;
@@ -2146,7 +2147,7 @@
         function updateTimeDisplay() {
             const cur = dom.audio.currentTime || 0;
             const dur = dom.audio.duration || 0;
-            
+
             if (progressElements.currentTime) {
                 progressElements.currentTime.textContent = fmt(cur);
             }
