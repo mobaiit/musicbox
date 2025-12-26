@@ -126,8 +126,9 @@
         .track .source-netease{color:#ff6b6b;}
         .track .source-qq{color:#4dd0e1;}
         .track .source-kuwo{color:#ba68c8;}
-        .track .playbtn{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#000;border:none;font-size:16px;display:flex;align-items:center;justify-content:center;margin-left:8px;}
+        .track .playbtn{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#000;border:none;font-size:16px;display:flex;align-items:center;justify-content:center;margin-left:8px;transition:all 0.3s ease;}
         .track.playing .playbtn{background:#fff;color:var(--accent);}
+        .track .playbtn.loading{background:rgba(255,107,107,0.6);transform:scale(0.9);}
 
         /* 底部播放器 - 简化版 */
         .player{flex-shrink:0;height:64px;background:var(--panel);border-top:1px solid var(--border);display:none;align-items:center;padding:8px 16px;position:relative;backdrop-filter:blur(30px);border-radius:0 0 20px 20px;}
@@ -1350,7 +1351,8 @@
         async function playTrack(track, clickedBtn){
             // 显示加载状态
             if(clickedBtn) {
-                clickedBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i>';
+                clickedBtn.classList.add('loading');
+                clickedBtn.innerHTML = '<i data-lucide="loader-2" style="animation:spin-icon 1s linear infinite;"></i>';
                 setTimeout(()=>lucide.createIcons(),10);
             }
 
@@ -1363,7 +1365,12 @@
 
             try {
                 await ensureDetail(track);
-                if(!track.url){toast('播放失败');updateUI();return;}
+                if(!track.url){
+                    toast('播放失败，自动切换下一首');
+                    if(clickedBtn)clickedBtn.classList.remove('loading');
+                    setTimeout(()=>nextTrack('next'),1000);
+                    return;
+                }
 
                 const histIdx=state.history.findIndex(t=>t.uid===track.uid);
                 if(histIdx>=0)state.history.splice(histIdx,1);
@@ -1374,14 +1381,16 @@
                 $('audio').src=track.url;
                 await $('audio').play();
                 state.playing=true;
+                if(clickedBtn)clickedBtn.classList.remove('loading');
                 updateUI();
 
                 state.lyrics=track.lrc?parseLRC(track.lrc):[];
                 renderLyrics();
                 renderInlineLyrics();
             } catch(e) {
-                toast('播放失败');
-                updateUI();
+                toast('播放失败，自动切换下一首');
+                if(clickedBtn)clickedBtn.classList.remove('loading');
+                setTimeout(()=>nextTrack('next'),1000);
             }
         }
         function showFirstTrack(){
