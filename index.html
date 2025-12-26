@@ -14,6 +14,7 @@
             --bg:linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             --panel:rgba(0,0,0,0.3);
             --accent:#ff6b6b;
+            --accent-rgb:255,107,107;
             --text-main:#ffffff;
             --text-sub:rgba(255,255,255,0.7);
             --border:rgba(255,255,255,0.1);
@@ -22,26 +23,32 @@
         #app.alt-style{
             --bg:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);
             --accent:#1db954;
+            --accent-rgb:29,185,84;
         }
         #app.alt-style-1{
             --bg:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);
             --accent:#ff6b35;
+            --accent-rgb:255,107,53;
         }
         #app.alt-style-2{
             --bg:linear-gradient(135deg, #2a2a3a 0%, #2e2a3e 50%, #3a2a3e 100%);
             --accent:#ff1744;
+            --accent-rgb:255,23,68;
         }
         #app.alt-style-3{
             --bg:linear-gradient(135deg, #1a2a3a 0%, #1a2e3a 50%, #1e3a2a 100%);
             --accent:#00d4ff;
+            --accent-rgb:0,212,255;
         }
         #app.alt-style-4{
             --bg:linear-gradient(135deg, #3a2a2e 0%, #3e2e1a 50%, #3a2e2a 100%);
             --accent:#ffeb3b;
+            --accent-rgb:255,235,59;
         }
         #app.alt-style-5{
             --bg:linear-gradient(135deg, #2a3a3a 0%, #2e3a3e 50%, #3a3e3a 100%);
             --accent:#ffd700;
+            --accent-rgb:255,215,0;
         }
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
         html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB",Microsoft YaHei,sans-serif;overflow:hidden;transition:background 0.3s ease;}
@@ -159,7 +166,14 @@
             transform:translateY(100%);
             transition:transform .4s cubic-bezier(.4,0,.2,1);
             z-index:102;
+            backdrop-filter:blur(20px);
         }
+        .full-player-panel.alt-style{background:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);}
+        .full-player-panel.alt-style-1{background:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);}
+        .full-player-panel.alt-style-2{background:linear-gradient(135deg, #2a2a3a 0%, #2e2a3e 50%, #3a2a3e 100%);}
+        .full-player-panel.alt-style-3{background:linear-gradient(135deg, #1a2a3a 0%, #1a2e3a 50%, #1e3a2a 100%);}
+        .full-player-panel.alt-style-4{background:linear-gradient(135deg, #3a2a2e 0%, #3e2e1a 50%, #3a2e2a 100%);}
+        .full-player-panel.alt-style-5{background:linear-gradient(135deg, #2a3a3a 0%, #2e3a3e 50%, #3a3e3a 100%);}
         .full-player-panel.show{
             transform:translateY(0);
         }
@@ -428,8 +442,14 @@
             display:flex;
             flex-direction:column;
             z-index:103;
-            backdrop-filter:blur(10px);
+            backdrop-filter:blur(20px);
         }
+        .playlist-view.alt-style{background:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);}
+        .playlist-view.alt-style-1{background:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);}
+        .playlist-view.alt-style-2{background:linear-gradient(135deg, #2a2a3a 0%, #2e2a3e 50%, #3a2a3e 100%);}
+        .playlist-view.alt-style-3{background:linear-gradient(135deg, #1a2a3a 0%, #1a2e3a 50%, #1e3a2a 100%);}
+        .playlist-view.alt-style-4{background:linear-gradient(135deg, #3a2a2e 0%, #3e2e1a 50%, #3a2e2a 100%);}
+        .playlist-view.alt-style-5{background:linear-gradient(135deg, #2a3a3a 0%, #2e3a3e 50%, #3a3e3a 100%);}
         .playlist-controls{
             display:flex;
             align-items:center;
@@ -483,7 +503,7 @@
             background:rgba(255,255,255,.05);
         }
         .playlist-item.active{
-            background:rgba(255,107,107,.1);
+            background:rgba(var(--accent-rgb),.1);
         }
         .playlist-item .checkbox{
             width:20px;
@@ -529,6 +549,12 @@
             transition:transform .3s cubic-bezier(.4,0,.2,1);
             backdrop-filter:blur(20px);
         }
+        .lyrics-view.alt-style{background:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);}
+        .lyrics-view.alt-style-1{background:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);}
+        .lyrics-view.alt-style-2{background:linear-gradient(135deg, #2a2a3a 0%, #2e2a3e 50%, #3a2a3e 100%);}
+        .lyrics-view.alt-style-3{background:linear-gradient(135deg, #1a2a3a 0%, #1a2e3a 50%, #1e3a2a 100%);}
+        .lyrics-view.alt-style-4{background:linear-gradient(135deg, #3a2a2e 0%, #3e2e1a 50%, #3a2e2a 100%);}
+        .lyrics-view.alt-style-5{background:linear-gradient(135deg, #2a3a3a 0%, #2e3a3e 50%, #3a3e3a 100%);}
         .lyrics-view.show{
             transform:translateX(0);
         }
@@ -577,193 +603,7 @@
             text-shadow:0 0 15px rgba(255,205,50,.55);
             transform:scale(1.02);
         }
-        .lyrics-scroll-full.alt-style{
-            color:var(--text-sub);
-            font-size:22px;
-            font-weight:700;
-            text-shadow:0 0 15px rgba(255,205,50,.55);
-            transform:scale(1.02);
-        }
-        .lyrics-scroll-full.alt-style .active{
-            color:#ff69b4;
-            text-shadow:0 0 20px rgba(255,105,180,.8);
-        }
-        .lyrics-view.alt-style{
-            background:linear-gradient(135deg,rgba(16,16,20,.95),rgba(32,32,40,.95));
-        }
-        .lyrics-view.alt-style .lyrics-scroll-full{
-            color:#e0e0e0;
-        }
-        .lyrics-view.alt-style .lyrics-scroll-full .active{
-            color:#1db954;
-            text-shadow:0 0 20px rgba(29,185,84,.6);
-        }
-        .lyrics-view.alt-style-1{
-            background:linear-gradient(135deg,rgba(20,20,30,.95),rgba(40,40,60,.95));
-        }
-        .lyrics-view.alt-style-1 .lyrics-scroll-full{
-            color:#f0f0f0;
-        }
-        .lyrics-view.alt-style-1 .lyrics-scroll-full .active{
-            color:#ff6b35;
-            text-shadow:0 0 20px rgba(255,107,53,.6);
-        }
-        .lyrics-view.alt-style-2{
-            background:linear-gradient(135deg,rgba(25,25,35,.95),rgba(45,45,65,.95));
-        }
-        .lyrics-view.alt-style-2 .lyrics-scroll-full{
-            color:#ffffff;
-        }
-        .lyrics-view.alt-style-2 .lyrics-scroll-full .active{
-            color:#ff1744;
-            text-shadow:0 0 20px rgba(255,23,68,.6);
-        }
-        .lyrics-view.alt-style-3{
-            background:linear-gradient(135deg,rgba(18,18,25,.95),rgba(35,35,50,.95));
-        }
-        .lyrics-view.alt-style-3 .lyrics-scroll-full{
-            color:#f5f5f5;
-        }
-        .lyrics-view.alt-style-3 .lyrics-scroll-full .active{
-            color:#00d4ff;
-            text-shadow:0 0 20px rgba(0,212,255,.6);
-        }
-        .lyrics-view.alt-style-4{
-            background:linear-gradient(135deg,rgba(200,50,50,.7),rgba(150,30,30,.7));
-        }
-        .lyrics-view.alt-style-4 .lyrics-scroll-full{
-            color:#ffffff;
-        }
-        .lyrics-view.alt-style-4 .lyrics-scroll-full .active{
-            color:#ffeb3b;
-            text-shadow:0 0 20px rgba(255,235,59,.8);
-        }
-        .lyrics-view.alt-style-5{
-            background:linear-gradient(135deg,rgba(30,144,255,.7),rgba(0,191,255,.7));
-        }
-        .lyrics-view.alt-style-5 .lyrics-scroll-full{
-            color:#ffffff;
-        }
-        .lyrics-view.alt-style-5 .lyrics-scroll-full .active{
-            color:#ffd700;
-            text-shadow:0 0 20px rgba(255,215,0,.8);
-        }
-        .cover-lyrics-container.alt-style{
-            background:linear-gradient(135deg,rgba(16,16,20,.95),rgba(32,32,40,.95));
-        }
-        .cover-lyrics-container.alt-style .inline-lyrics{
-            color:#e0e0e0;
-        }
-        .cover-lyrics-container.alt-style .inline-lyrics .active{
-            color:#1db954;
-            text-shadow:0 0 20px rgba(29,185,84,.6);
-        }
-        .cover-lyrics-container.alt-style-1{
-            background:linear-gradient(135deg,rgba(20,20,30,.95),rgba(40,40,60,.95));
-        }
-        .cover-lyrics-container.alt-style-1 .inline-lyrics{
-            color:#f0f0f0;
-        }
-        .cover-lyrics-container.alt-style-1 .inline-lyrics .active{
-            color:#ff6b35;
-            text-shadow:0 0 20px rgba(255,107,53,.6);
-        }
-        .cover-lyrics-container.alt-style-2{
-            background:linear-gradient(135deg,rgba(25,25,35,.95),rgba(45,45,65,.95));
-        }
-        .cover-lyrics-container.alt-style-2 .inline-lyrics{
-            color:#ffffff;
-        }
-        .cover-lyrics-container.alt-style-2 .inline-lyrics .active{
-            color:#ff1744;
-            text-shadow:0 0 20px rgba(255,23,68,.6);
-        }
-        .cover-lyrics-container.alt-style-3{
-            background:linear-gradient(135deg,rgba(18,18,25,.95),rgba(35,35,50,.95));
-        }
-        .cover-lyrics-container.alt-style-3 .inline-lyrics{
-            color:#f5f5f5;
-        }
-        .cover-lyrics-container.alt-style-3 .inline-lyrics .active{
-            color:#00d4ff;
-            text-shadow:0 0 20px rgba(0,212,255,.6);
-        }
-        .cover-lyrics-container.alt-style-4{
-            background:linear-gradient(135deg,rgba(200,50,50,.95),rgba(150,30,30,.95));
-        }
-        .cover-lyrics-container.alt-style-4 .inline-lyrics{
-            color:#ffffff;
-        }
-        .cover-lyrics-container.alt-style-4 .inline-lyrics .active{
-            color:#ffeb3b;
-            text-shadow:0 0 20px rgba(255,235,59,.8);
-        }
-        .cover-lyrics-container.alt-style-5{
-            background:linear-gradient(135deg,rgba(30,144,255,.95),rgba(0,191,255,.95));
-        }
-        .cover-lyrics-container.alt-style-5 .inline-lyrics{
-            color:#ffffff;
-        }
-        .full-player-panel.alt-style{
-            background:linear-gradient(135deg,rgba(16,16,20,.95),rgba(32,32,40,.95));
-        }
-        .full-player-panel.alt-style .inline-lyrics{
-            color:#e0e0e0;
-        }
-        .full-player-panel.alt-style .inline-lyrics .active{
-            color:#1db954;
-            text-shadow:0 0 20px rgba(29,185,84,.6);
-        }
-        .full-player-panel.alt-style-1{
-            background:linear-gradient(135deg,rgba(20,20,30,.95),rgba(40,40,60,.95));
-        }
-        .full-player-panel.alt-style-1 .inline-lyrics{
-            color:#f0f0f0;
-        }
-        .full-player-panel.alt-style-1 .inline-lyrics .active{
-            color:#ff6b35;
-            text-shadow:0 0 20px rgba(255,107,53,.6);
-        }
-        .full-player-panel.alt-style-2{
-            background:linear-gradient(135deg,rgba(25,25,35,.95),rgba(45,45,65,.95));
-        }
-        .full-player-panel.alt-style-2 .inline-lyrics{
-            color:#ffffff;
-        }
-        .full-player-panel.alt-style-2 .inline-lyrics .active{
-            color:#ff1744;
-            text-shadow:0 0 20px rgba(255,23,68,.6);
-        }
-        .full-player-panel.alt-style-3{
-            background:linear-gradient(135deg,rgba(18,18,25,.95),rgba(35,35,50,.95));
-        }
-        .full-player-panel.alt-style-3 .inline-lyrics{
-            color:#f5f5f5;
-        }
-        .full-player-panel.alt-style-3 .inline-lyrics .active{
-            color:#00d4ff;
-            text-shadow:0 0 20px rgba(0,212,255,.6);
-        }
-        .full-player-panel.alt-style-4{
-            background:linear-gradient(135deg,rgba(200,50,50,.7),rgba(150,30,30,.7));
-        }
-        .full-player-panel.alt-style-4 .inline-lyrics{
-            color:#ffffff;
-        }
-        .full-player-panel.alt-style-4 .inline-lyrics .active{
-            color:#ffeb3b;
-            text-shadow:0 0 20px rgba(255,235,59,.8);
-        }
-        .full-player-panel.alt-style-5{
-            background:linear-gradient(135deg,rgba(30,144,255,.7),rgba(0,191,255,.7));
-        }
-        .full-player-panel.alt-style-5 .inline-lyrics{
-            color:#ffffff;
-        }
-        .full-player-panel.alt-style-5 .inline-lyrics .active{
-            color:#ffd700;
-            text-shadow:0 0 20px rgba(255,215,0,.8);
-        }
+
         .lyrics-controls{
             display:flex;
             justify-content:center;
@@ -787,7 +627,14 @@
             display:flex;
             flex-direction:column;
             z-index:103;
+            backdrop-filter:blur(20px);
         }
+        .volume-panel.alt-style{background:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);}
+        .volume-panel.alt-style-1{background:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);}
+        .volume-panel.alt-style-2{background:linear-gradient(135deg, #2a2a3a 0%, #2e2a3e 50%, #3a2a3e 100%);}
+        .volume-panel.alt-style-3{background:linear-gradient(135deg, #1a2a3a 0%, #1a2e3a 50%, #1e3a2a 100%);}
+        .volume-panel.alt-style-4{background:linear-gradient(135deg, #3a2a2e 0%, #3e2e1a 50%, #3a2e2a 100%);}
+        .volume-panel.alt-style-5{background:linear-gradient(135deg, #2a3a3a 0%, #2e3a3e 50%, #3a3e3a 100%);}
         .volume-header{
             display:flex;
             align-items:center;
@@ -1725,16 +1572,12 @@
             dom.searchInput.addEventListener('blur',()=>{setTimeout(()=>$('searchHistory').classList.remove('show'),200);});
             $('disclaimerOpenBtn').addEventListener('click',()=>{$('disclaimerModal').style.display='flex';});
             $('disclaimerBtn').addEventListener('click',()=>{
-                const app = $('app');
-                const body = document.body;
-                const fullPlayerPanel = $('fullPlayerPanel');
-                const playlistView = $('playlistView');
-                const lyricsView = $('lyricsView');
+                const elements = [$('app'), document.body, $('fullPlayerPanel'), $('playlistView'), $('lyricsView'), $('volumePanel')];
                 const styles = ['', 'alt-style', 'alt-style-1', 'alt-style-2', 'alt-style-3', 'alt-style-4', 'alt-style-5'];
                 const names = ['默认风格', 'Spotify风格', 'Apple Music风格', 'YouTube Music风格', 'Tidal风格', '网易云风格', 'QQ音乐风格'];
-                styles.forEach(style => {if(style) {app.classList.remove(style);body.classList.remove(style);fullPlayerPanel.classList.remove(style);playlistView.classList.remove(style);lyricsView.classList.remove(style);}});
+                styles.forEach(style => {if(style) elements.forEach(el => el?.classList.remove(style));});
                 state.appStyle = (state.appStyle + 1) % styles.length;
-                if(styles[state.appStyle]) {app.classList.add(styles[state.appStyle]);body.classList.add(styles[state.appStyle]);fullPlayerPanel.classList.add(styles[state.appStyle]);playlistView.classList.add(styles[state.appStyle]);lyricsView.classList.add(styles[state.appStyle]);}
+                if(styles[state.appStyle]) elements.forEach(el => el?.classList.add(styles[state.appStyle]));
                 saveData();
                 toast(`切换到${names[state.appStyle]}`);
             });
@@ -1759,24 +1602,12 @@
             dom.fullDownloadBtn.addEventListener('click',()=>downloadTrack(state.current));
             $('fullLyricsBtn').addEventListener('click',()=>{
                 if(window.innerWidth >= 768) {
-                    // PC端切换歌词样式 - 使用主风格
-                    const fullPlayerPanel = $('fullPlayerPanel');
-                    const styles = ['', 'alt-style', 'alt-style-1', 'alt-style-2', 'alt-style-3', 'alt-style-4', 'alt-style-5'];
-                    const names = ['默认样式', 'Spotify风格', 'Apple Music风格', 'YouTube Music风格', 'Tidal风格', '网易云风格', 'QQ音乐风格'];
-
-                    // 移除所有样式类
-                    styles.forEach(style => {
-                        if(style) fullPlayerPanel.classList.remove(style);
-                    });
-
-                    // 使用主风格设置
-                    if(styles[state.appStyle]) {
-                        fullPlayerPanel.classList.add(styles[state.appStyle]);
+                    const lyricsContainer = document.querySelector('.lyrics-container');
+                    if(lyricsContainer) {
+                        lyricsContainer.style.display = lyricsContainer.style.display === 'none' ? 'block' : 'none';
+                        toast(lyricsContainer.style.display === 'none' ? '歌词已隐藏' : '歌词已显示');
                     }
-
-                    toast(`已应用${names[state.appStyle]}`);
                 } else {
-                    // 手机端显示歌词页面
                     showLyrics();
                 }
             });
@@ -2046,18 +1877,10 @@
             updateModeUI();
             
             // 恢复风格设置
-            const app = $('app');
-            const body = document.body;
-            const fullPlayerPanel = $('fullPlayerPanel');
-            const playlistView = $('playlistView');
-            const lyricsView = $('lyricsView');
+            const elements = [$('app'), document.body, $('fullPlayerPanel'), $('playlistView'), $('lyricsView'), $('volumePanel')];
             const styles = ['', 'alt-style', 'alt-style-1', 'alt-style-2', 'alt-style-3', 'alt-style-4', 'alt-style-5'];
             if(styles[state.appStyle]) {
-                app.classList.add(styles[state.appStyle]);
-                body.classList.add(styles[state.appStyle]);
-                fullPlayerPanel.classList.add(styles[state.appStyle]);
-                playlistView.classList.add(styles[state.appStyle]);
-                lyricsView.classList.add(styles[state.appStyle]);
+                elements.forEach(el => el?.classList.add(styles[state.appStyle]));
             }
 
             // 初始化图标一次
