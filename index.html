@@ -93,9 +93,9 @@
         }
 
         /* 搜索历史 */
-        .search-history{flex-shrink:0;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);display:none;}
+        .search-history{flex-shrink:0;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);display:none;overflow-x:auto;white-space:nowrap;}
         .search-history.show{display:block;}
-        .search-history-btn{margin:4px 8px 4px 0;padding:4px 12px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.1);color:var(--text-main);font-size:12px;cursor:pointer;}
+        .search-history-btn{display:inline-block;margin:4px 8px 4px 0;padding:4px 12px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.1);color:var(--text-main);font-size:12px;cursor:pointer;}
 
         /* 来源选择条 */
         .sourcebar{flex-shrink:0;display:flex;gap:8px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-size:12px;color:var(--text-sub);justify-content:space-between;align-items:center;}
@@ -1685,6 +1685,41 @@
                 toast(modeNames[state.mode]);
             });
             $('playlistBackBtn').addEventListener('click',()=>{$('playlistView').style.display='none';});
+            
+            // 播放列表下滑手势返回全屏播放器
+            let playlistStartY = 0;
+            let playlistIsDragging = false;
+            
+            $('playlistView').addEventListener('touchstart', e => {
+                if (e.target.closest('.playlist-controls')) return;
+                playlistStartY = e.touches[0].clientY;
+                playlistIsDragging = true;
+            });
+            
+            $('playlistView').addEventListener('touchmove', e => {
+                if (!playlistIsDragging) return;
+                if (e.target.closest('.playlist-controls')) return;
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - playlistStartY;
+                if (diff > 0) {
+                    e.preventDefault();
+                    const progress = Math.min(diff / 200, 1);
+                    $('playlistView').style.transform = `translateY(${diff}px)`;
+                }
+            });
+            
+            $('playlistView').addEventListener('touchend', e => {
+                if (!playlistIsDragging) return;
+                const endY = e.changedTouches[0].clientY;
+                const diff = endY - playlistStartY;
+                if (diff > 100) {
+                    $('playlistView').style.display = 'none';
+                    $('playlistView').style.transform = '';
+                } else {
+                    $('playlistView').style.transform = '';
+                }
+                playlistIsDragging = false;
+            });
             $('selectAllBtn').addEventListener('click',()=>{
                 const currentTab=document.querySelector('.tab.active').dataset.tab;
                 let list=[];
@@ -1861,10 +1896,10 @@
             function closeFullPlayer(){
                 dom.fullPlayerMask.classList.remove('show');
                 dom.fullPlayerPanel.classList.remove('show');
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     dom.fullPlayerPanel.style.transform = '';
                     dom.fullPlayerMask.style.opacity = '';
-                }, 300);
+                });
                 hideLyrics();
                 $('playlistView').style.display='none';
             }
