@@ -1050,6 +1050,27 @@
             appStyle:0
         };
 
+        // 删除失败歌曲的收藏和历史记录
+        function removeFailedTrack(track) {
+            if(!track || !track.uid) return;
+            
+            // 从收藏中删除
+            const favIdx = state.favorites.findIndex(t => t.uid === track.uid);
+            if(favIdx >= 0) {
+                state.favorites.splice(favIdx, 1);
+            }
+            
+            // 从历史记录中删除
+            const histIdx = state.history.findIndex(t => t.uid === track.uid);
+            if(histIdx >= 0) {
+                state.history.splice(histIdx, 1);
+            }
+            
+            saveData();
+            // 延迟刷新避免闪烁
+            setTimeout(() => renderList(), 100);
+        }
+
         // 防止无限递归的播放失败计数器
         let playFailCount = 0;
         const MAX_PLAY_FAIL_COUNT = 3;
@@ -1322,6 +1343,7 @@
                 if(!track.url){
                     toast('无法获取播放链接');
                     playFailCount++;
+                    removeFailedTrack(track); // 删除失败歌曲
                     if(clickedBtn) {
                         clickedBtn.innerHTML = '<i data-lucide="play"></i>';
                         setTimeout(()=>lucide.createIcons(),10);
@@ -1358,6 +1380,7 @@
                 console.error('播放失败:', e);
                 toast('播放失败');
                 playFailCount++;
+                removeFailedTrack(track); // 删除失败歌曲
                 if(clickedBtn) {
                     clickedBtn.innerHTML = '<i data-lucide="play"></i>';
                     setTimeout(()=>lucide.createIcons(),10);
@@ -2000,6 +2023,9 @@
                 state.playing = false;
                 updateUI();
                 playFailCount++; // 增加失败计数
+                if(state.current) {
+                    removeFailedTrack(state.current); // 删除失败歌曲
+                }
                 // 延迟执行并限制错误处理频率
                 setTimeout(() => {
                     if(!isPlaying && playFailCount < MAX_PLAY_FAIL_COUNT) {
