@@ -1050,6 +1050,10 @@
             appStyle:0
         };
 
+        // 防止无限递归的播放失败计数器
+        let playFailCount = 0;
+        const MAX_PLAY_FAIL_COUNT = 3;
+
         // 本地存储
         function saveData(){localStorage.setItem('musicbox',JSON.stringify({favorites:state.favorites,history:state.history,searchHistory:state.searchHistory,enabledSources:state.enabledSources,mode:state.mode,volume:state.volume,quality:state.quality,perLimit:state.perLimit,appStyle:state.appStyle}));}
         function loadData(){try{const d=JSON.parse(localStorage.getItem('musicbox')||'{}');Object.assign(state,d);if(!state.history)state.history=[];if(!state.searchHistory)state.searchHistory=[];if(!state.quality)state.quality='high';if(!state.perLimit)state.perLimit=20;if(state.appStyle===undefined)state.appStyle=0;}catch(e){}}
@@ -1200,9 +1204,24 @@
                         headerDiv.innerHTML='<span style="color:var(--text-sub);font-size:14px;">播放历史</span><button id="clearHistoryBtn" style="padding:4px 8px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.1);color:var(--text-sub);font-size:12px;cursor:pointer;">清空历史</button>';
                         wrap.appendChild(headerDiv);
                         state.history.slice(0,20).forEach((tr,idx)=>{
+                            // 验证历史记录的完整性
+                            if(!tr || !tr.uid || !tr.title) return;
+                            
                             const row=document.createElement('div');row.className='track fade-in';const srcTag=tr.source==='migu'?'咪咕':tr.source==='netease'?'网易云':tr.source==='qq'?'QQ':'酷我';
                             row.innerHTML=`<div class="index">${idx+1}</div><img class="cover" src="${tr.cover||''}" style="display:${tr.cover?'block':'none'}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" onload="this.style.display='block';this.nextElementSibling.style.display='none'"><div class="cover-placeholder" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,rgba(255,205,50,.15),rgba(255,183,77,.15));display:${tr.cover?'none':'flex'};margin-right:12px;flex-shrink:0;align-items:center;justify-content:center;color:var(--accent);font-size:22px;box-shadow:0 2px 6px rgba(255,205,50,.2);"><i data-lucide="music"></i></div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist"><span class="source-tag source-${tr.source}">${srcTag}</span>${tr.singer||''}</div></div><button class="playbtn"><i data-lucide="play"></i></button>`;
-                            row.querySelector('.playbtn').onclick=async(e)=>{e.stopPropagation();await playTrack(tr);};row.onclick=()=>row.querySelector('.playbtn').click();wrap.appendChild(row);
+                            const playBtn = row.querySelector('.playbtn');
+                            playBtn.onclick=async(e)=>{
+                                e.stopPropagation();
+                                // 防止重复点击
+                                if(playBtn.innerHTML.includes('loader-2')) return;
+                                await playTrack(tr, playBtn);
+                            };
+                            row.onclick=()=>{
+                                if(!playBtn.innerHTML.includes('loader-2')) {
+                                    playBtn.click();
+                                }
+                            };
+                            wrap.appendChild(row);
                         });
                         // 添加清空历史按钮事件
                         const clearBtn=document.getElementById('clearHistoryBtn');
@@ -1226,7 +1245,43 @@
                     }
                     return;
                 }
-                list.forEach((tr,idx)=>{const row=document.createElement('div');row.className='track fade-in';const srcTag=tr.source==='migu'?'咪咕':tr.source==='netease'?'网易云':tr.source==='qq'?'QQ':'酷我';row.innerHTML=`<div class="index">${idx+1}</div><img class="cover" src="${tr.cover||''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" onload="this.style.display='block';this.nextElementSibling.style.display='none'"><div class="cover-placeholder" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,rgba(255,205,50,.15),rgba(255,183,77,.15));display:${tr.cover?'none':'flex'};margin-right:12px;flex-shrink:0;align-items:center;justify-content:center;color:var(--accent);font-size:22px;box-shadow:0 2px 6px rgba(255,205,50,.2);"><i data-lucide="music"></i></div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist"><span class="source-tag source-${tr.source}">${srcTag}</span>${tr.singer||''}</div></div><button class="playbtn"><i data-lucide="play"></i></button>`;const playBtn=row.querySelector('.playbtn');playBtn.onclick=async(e)=>{e.stopPropagation();if(state.current&&state.current.uid===tr.uid&&state.current.url){if(dom.audio.paused){dom.audio.play();state.playing=true;}else{dom.audio.pause();state.playing=false;}updateUI();}else{await playTrack(tr,playBtn);}};row.onclick=()=>playBtn.click();wrap.appendChild(row);});
+                list.forEach((tr,idx)=>{
+                    // 验证歌曲数据的完整性
+                    if(!tr || !tr.uid || !tr.title) return;
+                    
+                    const row=document.createElement('div');row.className='track fade-in';const srcTag=tr.source==='migu'?'咪咕':tr.source==='netease'?'网易云':tr.source==='qq'?'QQ':'酷我';
+                    row.innerHTML=`<div class="index">${idx+1}</div><img class="cover" src="${tr.cover||''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" onload="this.style.display='block';this.nextElementSibling.style.display='none'"><div class="cover-placeholder" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,rgba(255,205,50,.15),rgba(255,183,77,.15));display:${tr.cover?'none':'flex'};margin-right:12px;flex-shrink:0;align-items:center;justify-content:center;color:var(--accent);font-size:22px;box-shadow:0 2px 6px rgba(255,205,50,.2);"><i data-lucide="music"></i></div><div class="info"><div class="title">${tr.title||'Unknown'}</div><div class="artist"><span class="source-tag source-${tr.source}">${srcTag}</span>${tr.singer||''}</div></div><button class="playbtn"><i data-lucide="play"></i></button>`;
+                    const playBtn=row.querySelector('.playbtn');
+                    playBtn.onclick=async(e)=>{
+                        e.stopPropagation();
+                        // 防止重复点击
+                        if(playBtn.innerHTML.includes('loader-2')) return;
+                        
+                        if(state.current&&state.current.uid===tr.uid&&state.current.url){
+                            if(dom.audio.paused){
+                                try {
+                                    await dom.audio.play();
+                                    state.playing=true;
+                                } catch(e) {
+                                    console.error('播放失败:', e);
+                                    await playTrack(tr,playBtn);
+                                }
+                            }else{
+                                dom.audio.pause();
+                                state.playing=false;
+                            }
+                            updateUI();
+                        }else{
+                            await playTrack(tr,playBtn);
+                        }
+                    };
+                    row.onclick=()=>{
+                        if(!playBtn.innerHTML.includes('loader-2')) {
+                            playBtn.click();
+                        }
+                    };
+                    wrap.appendChild(row);
+                });
             });
         }
         async function playTrack(track, clickedBtn){
@@ -1234,6 +1289,16 @@
             if(clickedBtn) {
                 clickedBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i>';
                 setTimeout(()=>lucide.createIcons(),10);
+            }
+
+            // 验证track对象的完整性
+            if(!track || !track.uid) {
+                toast('歌曲信息不完整');
+                if(clickedBtn) {
+                    clickedBtn.innerHTML = '<i data-lucide="play"></i>';
+                    setTimeout(()=>lucide.createIcons(),10);
+                }
+                return;
             }
 
             state.current=track;
@@ -1245,7 +1310,23 @@
 
             try {
                 await ensureDetail(track);
-                if(!track.url){toast('播放失败');updateUI();return;}
+                if(!track.url){
+                    toast('无法获取播放链接');
+                    playFailCount++;
+                    if(clickedBtn) {
+                        clickedBtn.innerHTML = '<i data-lucide="play"></i>';
+                        setTimeout(()=>lucide.createIcons(),10);
+                    }
+                    updateUI();
+                    // 防止无限递归
+                    if(playFailCount < MAX_PLAY_FAIL_COUNT) {
+                        setTimeout(() => nextTrack('next'), 1000);
+                    } else {
+                        toast('连续播放失败，请手动选择歌曲');
+                        playFailCount = 0;
+                    }
+                    return;
+                }
 
                 const histIdx=state.history.findIndex(t=>t.uid===track.uid);
                 if(histIdx>=0)state.history.splice(histIdx,1);
@@ -1256,14 +1337,28 @@
                 $('audio').src=track.url;
                 await $('audio').play();
                 state.playing=true;
+                playFailCount = 0; // 播放成功，重置失败计数
                 updateUI();
 
                 state.lyrics=track.lrc?parseLRC(track.lrc):[];
                 renderLyrics();
                 renderInlineLyrics();
             } catch(e) {
-                toast('播放失败，自动切换下一首');
-                nextTrack('next');
+                console.error('播放失败:', e);
+                toast('播放失败');
+                playFailCount++;
+                if(clickedBtn) {
+                    clickedBtn.innerHTML = '<i data-lucide="play"></i>';
+                    setTimeout(()=>lucide.createIcons(),10);
+                }
+                updateUI();
+                // 防止无限递归
+                if(playFailCount < MAX_PLAY_FAIL_COUNT) {
+                    setTimeout(() => nextTrack('next'), 1000);
+                } else {
+                    toast('连续播放失败，请手动选择歌曲');
+                    playFailCount = 0;
+                }
             }
         }
         function showFirstTrack(){
@@ -1504,7 +1599,51 @@
 
 
         function toggleFav(){if(!state.current)return;const idx=state.favorites.findIndex(t=>t.uid===state.current.uid);if(idx>=0){state.favorites.splice(idx,1);toast('已取消收藏');}else{state.favorites.push(state.current);toast('已收藏');}saveData();updateUI();renderList();}
-        function nextTrack(dir){const tab=document.querySelector('.tab.active').dataset.tab;let list=[];if(tab==='results')list=state.results;else if(tab==='favorites')list=state.favorites;else if(tab==='playlists')list=state.history;if(!list.length)return;let idx=list.findIndex(t=>t.uid===state.current.uid);if(idx<0)idx=0;if(state.mode==='single'){$('audio').currentTime=0;$('audio').play();return;}if(state.mode==='shuffle'){if(list.length===1)idx=0;else{let n;do{n=Math.floor(Math.random()*list.length);}while(n===idx);idx=n;}}else{idx=(idx+(dir==='prev'?-1:1)+list.length)%list.length;}playTrack(list[idx]);}
+        function nextTrack(dir){
+            const tab=document.querySelector('.tab.active').dataset.tab;
+            let list=[];
+            if(tab==='results')list=state.results;
+            else if(tab==='favorites')list=state.favorites;
+            else if(tab==='playlists')list=state.history;
+            
+            if(!list.length){
+                toast('播放列表为空');
+                return;
+            }
+            
+            let idx=list.findIndex(t=>t.uid===state.current?.uid);
+            if(idx<0)idx=0;
+            
+            if(state.mode==='single'){
+                if(state.current && state.current.url) {
+                    $('audio').currentTime=0;
+                    $('audio').play();
+                } else {
+                    playTrack(state.current);
+                }
+                return;
+            }
+            
+            if(state.mode==='shuffle'){
+                if(list.length===1)idx=0;
+                else{
+                    let n;
+                    do{
+                        n=Math.floor(Math.random()*list.length);
+                    }while(n===idx && list.length > 1);
+                    idx=n;
+                }
+            }else{
+                idx=(idx+(dir==='prev'?-1:1)+list.length)%list.length;
+            }
+            
+            const nextTrack = list[idx];
+            if(nextTrack && nextTrack.uid) {
+                playTrack(nextTrack);
+            } else {
+                toast('下一首歌曲信息不完整');
+            }
+        }
 
         function togglePlayMode(){
             const modes=['list','single','shuffle'];
@@ -1819,7 +1958,34 @@
                 updateTimeDisplay();
                 updateLyrics(dom.audio.currentTime || 0);
             });
-            dom.audio.addEventListener('ended',()=>nextTrack('next'));dom.audio.addEventListener('play',()=>{state.playing=true;updateUI();if(dom.fullCover)dom.fullCover.classList.remove('paused');});dom.audio.addEventListener('pause',()=>{state.playing=false;updateUI();if(dom.fullCover)dom.fullCover.classList.add('paused');});dom.audio.addEventListener('error',()=>{toast('播放失败，自动切换下一首');nextTrack('next');});
+            dom.audio.addEventListener('ended',()=>{
+                // 延迟执行避免快速连续调用
+                setTimeout(() => nextTrack('next'), 100);
+            });
+            dom.audio.addEventListener('play',()=>{
+                state.playing=true;
+                updateUI();
+                if(dom.fullCover)dom.fullCover.classList.remove('paused');
+            });
+            dom.audio.addEventListener('pause',()=>{
+                state.playing=false;
+                updateUI();
+                if(dom.fullCover)dom.fullCover.classList.add('paused');
+            });
+            dom.audio.addEventListener('error',(e)=>{
+                console.error('音频播放错误:', e);
+                toast('音频播放出错');
+                state.playing = false;
+                updateUI();
+                // 延迟执行并限制错误处理频率
+                setTimeout(() => {
+                    if(playFailCount < MAX_PLAY_FAIL_COUNT) {
+                        nextTrack('next');
+                    } else {
+                        toast('音频连续出错，请检查网络或手动选择歌曲');
+                    }
+                }, 1000);
+            });
 
             document.querySelectorAll('.controls button').forEach(btn=>btn.addEventListener('click',e=>e.stopPropagation()));
             document.querySelector('.cover-wrapper').addEventListener('click',e=>e.stopPropagation());
