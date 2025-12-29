@@ -170,9 +170,10 @@
             display:flex;
             flex-direction:column;
             transform:translateY(100%);
-            transition:transform .4s cubic-bezier(.4,0,.2,1);
+            transition:transform .3s cubic-bezier(.4,0,.2,1);
             z-index:102;
             backdrop-filter:blur(20px);
+            contain:layout style paint;
         }
         .full-player-panel.alt-style{background:linear-gradient(135deg, #1a1a1f 0%, #1e1e24 50%, #222228 100%);}
         .full-player-panel.alt-style-1{background:linear-gradient(135deg, #1f1a2e 0%, #1a2e2a 50%, #1e2e1f 100%);}
@@ -189,6 +190,8 @@
             justify-content:space-between;
             padding:12px 20px;
             height:56px;
+            flex-shrink:0;
+            contain:layout;
         }
         .close-btn{
             width:40px;
@@ -234,10 +237,6 @@
             transform:translateY(-50%);
             width:40px;
             height:40px;
-            min-width:40px;
-            min-height:40px;
-            max-width:40px;
-            max-height:40px;
             border-radius:50%;
             border:none;
             background:rgba(255,255,255,.1);
@@ -246,9 +245,7 @@
             display:flex;
             align-items:center;
             justify-content:center;
-            transition:transform .15s ease;
-            flex-shrink:0;
-            contain:layout;
+            transition:all .2s;
         }
         .full-player-fav-btn:active{
             transform:translateY(-50%) scale(0.95);
@@ -371,6 +368,8 @@
             align-items:center;
             padding:0 24px;
             margin-bottom:32px;
+            flex-shrink:0;
+            contain:layout;
         }
         .time{
             font-size:12px;
@@ -412,7 +411,8 @@
             gap:16px;
             padding:0 20px;
             margin-bottom:24px;
-            min-height:80px;
+            flex-shrink:0;
+            contain:layout;
         }
         .control-btn{
             width:48px;
@@ -449,7 +449,6 @@
             box-shadow:0 4px 16px rgba(255,205,50,.4);
         }
         
-        /* 小屏幕优化 */
         @media (max-width: 360px) {
             .full-player-controls {
                 gap:12px;
@@ -481,10 +480,6 @@
             right:30px;
             width:56px;
             height:56px;
-            min-width:56px;
-            min-height:56px;
-            max-width:56px;
-            max-height:56px;
             border-radius:50%;
             border:none;
             background:var(--accent);
@@ -495,8 +490,6 @@
             justify-content:center;
             box-shadow:0 4px 16px rgba(255,107,107,0.4);
             z-index:105;
-            flex-shrink:0;
-            contain:layout;
         }
 
         /* 播放列表视图 */
@@ -525,10 +518,6 @@
         .playlist-mode-btn{
             width:40px;
             height:40px;
-            min-width:40px;
-            min-height:40px;
-            max-width:40px;
-            max-height:40px;
             border-radius:50%;
             border:none;
             background:rgba(255,255,255,.1);
@@ -537,8 +526,6 @@
             display:flex;
             align-items:center;
             justify-content:center;
-            flex-shrink:0;
-            contain:layout;
         }
         .playlist-batch-controls{
             display:none;
@@ -707,10 +694,6 @@
                 transform: translateY(-50%);
                 width: 40px;
                 height: 40px;
-                min-width: 40px;
-                min-height: 40px;
-                max-width: 40px;
-                max-height: 40px;
                 border-radius: 50%;
                 border: none;
                 background: rgba(255,255,255,.1);
@@ -719,9 +702,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: transform .15s ease;
-                flex-shrink: 0;
-                contain: layout;
+                transition: all .2s;
             }
             .pc-fav-btn:active {
                 transform: translateY(-50%) scale(0.95);
@@ -1649,6 +1630,44 @@
             dom.favBtn.addEventListener('click',toggleFav);
             dom.menuBtn.addEventListener('click',()=>{dom.fullPlayerMask.classList.add('show');dom.fullPlayerPanel.classList.add('show');});
 
+            // 全屏播放器下滑手势退出
+            let fullPlayerStartY = 0;
+            let fullPlayerIsDragging = false;
+            
+            dom.fullPlayerPanel.addEventListener('touchstart', e => {
+                fullPlayerStartY = e.touches[0].clientY;
+                fullPlayerIsDragging = true;
+            });
+            
+            dom.fullPlayerPanel.addEventListener('touchmove', e => {
+                if (!fullPlayerIsDragging) return;
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - fullPlayerStartY;
+                if (diff > 0) {
+                    e.preventDefault();
+                    const progress = Math.min(diff / 200, 1);
+                    requestAnimationFrame(() => {
+                        dom.fullPlayerPanel.style.transform = `translateY(${diff}px)`;
+                        dom.fullPlayerMask.style.opacity = 1 - progress * 0.5;
+                    });
+                }
+            });
+            
+            dom.fullPlayerPanel.addEventListener('touchend', e => {
+                if (!fullPlayerIsDragging) return;
+                const endY = e.changedTouches[0].clientY;
+                const diff = endY - fullPlayerStartY;
+                if (diff > 100) {
+                    closeFullPlayer();
+                } else {
+                    requestAnimationFrame(() => {
+                        dom.fullPlayerPanel.style.transform = 'translateY(0)';
+                        dom.fullPlayerMask.style.opacity = '1';
+                    });
+                }
+                fullPlayerIsDragging = false;
+            });
+
             // 全屏播放器事件
             dom.fullPlayBtn.addEventListener('click',async(e)=>{if(!state.current)return;if(state.current.url){if(dom.audio.paused){dom.audio.play();state.playing=true;}else{dom.audio.pause();state.playing=false;}updateUI();}else{dom.fullPlayBtn.innerHTML='<i data-lucide="loader-2" class="animate-spin"></i>';setTimeout(()=>lucide.createIcons(),10);await playTrack(state.current);updateUI();}});
             dom.fullPrevBtn.addEventListener('click',()=>{dom.fullPlayBtn.innerHTML='<i data-lucide="loader-2" class="animate-spin"></i>';setTimeout(()=>lucide.createIcons(),10);nextTrack('prev');setTimeout(()=>updateUI(),500);});
@@ -1842,6 +1861,8 @@
             function closeFullPlayer(){
                 dom.fullPlayerMask.classList.remove('show');
                 dom.fullPlayerPanel.classList.remove('show');
+                dom.fullPlayerPanel.style.transform = 'translateY(100%)';
+                dom.fullPlayerMask.style.opacity = '0';
                 hideLyrics();
                 $('playlistView').style.display='none';
             }
